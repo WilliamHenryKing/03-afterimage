@@ -105,10 +105,10 @@ const projector: Build = (seed) => {
 
 export const project = { id: "03-afterimage", name: "AFTERIMAGE", background: 0x1b1d2a };
 export const families: Recipes["families"] = [
-  { id: "gear", count: 30, voxel: 0.0025, keep: 0.3, build: gear },
+  { id: "gear", count: 60, voxel: 0.0025, keep: 0.3, build: gear },
   { id: "boiler-tank", count: 20, voxel: 0.01, keep: 0.25, hero: true, build: tank },
   { id: "lens-housing", count: 24, voxel: 0.003, keep: 0.3, build: lensHousing },
-  { id: "gauge", count: 16, voxel: 0.002, keep: 0.3, build: gauge },
+  { id: "gauge", count: 32, voxel: 0.002, keep: 0.3, build: gauge },
   { id: "projector", count: 12, voxel: 0.006, keep: 0.3, hero: true, build: projector },
 ];
 export const textures: Recipes["textures"] = [
