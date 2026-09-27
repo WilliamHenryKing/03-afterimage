@@ -21,6 +21,8 @@ import { CAMERA_SHOTS, Venues } from "./venues";
 export interface StageEvents {
   onFirstFrame: () => void;
   onFocusChange: (focused: boolean) => void;
+  /** Each frame: lens speed (units/s) and how split the light is (0..1). */
+  onLensFrame?: (speed: number, separation: number) => void;
 }
 
 export interface Stage {
@@ -183,6 +185,7 @@ export function createStage(
   canvas.addEventListener("keydown", onKey);
 
   const timer = new THREE.Timer();
+  let lastLens: LensPos = { ...lens };
   let firstFrame = true;
   let cameraTween: gsap.core.Timeline | null = null;
 
@@ -190,7 +193,11 @@ export function createStage(
     timer.update(now);
     const dt = Math.min(timer.getDelta(), 0.1);
     const t = timer.getElapsed();
-    const target = 1 - Math.min(1, separation(lens) / 0.55);
+    const sep = separation(lens);
+    const speed = dt > 0 ? Math.hypot(lens.x - lastLens.x, lens.y - lastLens.y) / dt : 0;
+    lastLens = { ...lens };
+    events.onLensFrame?.(speed, sep);
+    const target = 1 - Math.min(1, sep / 0.55);
     focus += (target - focus) * (reduced ? 1 : 1 - Math.exp(-dt * 8));
     // A slow breath in the lens hanger when idle, never enough to lose focus.
     const sway = reduced || drag ? 0 : Math.sin(t * 0.7) * 0.006;

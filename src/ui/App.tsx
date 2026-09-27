@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { sound } from "../audio/sound";
 import { compose } from "../game/composition";
 import { type PassId, passCovers, recommendPass } from "../game/passes";
 import type { DayFilter, VenueFilter } from "../game/schedule";
-import { keepOnly, toggleSaved } from "../game/schedule";
+import { clashes, keepOnly, toggleSaved } from "../game/schedule";
 import { decodeState, encodeState } from "../game/share";
 import { worldReady } from "../loader";
 import { createStage, type Stage } from "../scene/stage";
@@ -14,6 +15,7 @@ import {
   useReducedMotion,
   useViewportHeight,
 } from "./hooks";
+import { MuteToggle } from "./MuteToggle";
 import { Panel, type Tab } from "./Panel";
 import { PuzzleDialog } from "./PuzzleDialog";
 import { createPosterCanvas, drawPoster } from "./poster";
@@ -59,6 +61,7 @@ export function App() {
       stage = createStage(canvas, poster, {
         onFirstFrame: () => requestAnimationFrame(() => worldReady()),
         onFocusChange: setFocused,
+        onLensFrame: (speed, sep) => sound.lens(speed, sep),
       });
     } catch {
       // No WebGL: the programme, pass and ticket still work without the projection.
@@ -109,14 +112,79 @@ export function App() {
   }, [saved, passChosen]);
 
   const choosePass = useCallback((p: PassId) => {
+    sound.play("click");
     setPass(p);
     setPassChosen(true);
   }, []);
 
-  const toggle = useCallback((id: string) => setSaved((s) => toggleSaved(s, id)), []);
-  const keep = useCallback((id: string) => setSaved((s) => keepOnly(s, id)), []);
+  const toggle = (id: string) => {
+    const next = toggleSaved(saved, id);
+    const added = next.length > saved.length;
+    sound.play(!added ? "unsave" : clashes(next).length > clashes(saved).length ? "clash" : "save");
+    setSaved(next);
+  };
+  const keep = (id: string) => {
+    sound.play("keep");
+    setSaved((s) => keepOnly(s, id));
+  };
+  const clicked =
+    <T,>(fn: (v: T) => void) =>
+    (v: T) => {
+      sound.play("click");
+      fn(v);
+    };
+
+  // Sound: unlocked by the first gesture, M toggles mute, cues follow the state they announce.
+  useEffect(() => {
+    const unlock = () => sound.unlock();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "m" || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target instanceof HTMLInputElement && e.target.type === "text") return;
+      sound.unlock();
+      sound.setMuted(!sound.muted);
+    };
+    window.addEventListener("pointerdown", unlock, true);
+    window.addEventListener("keydown", unlock, true);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("pointerdown", unlock, true);
+      window.removeEventListener("keydown", unlock, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (focused) sound.play("focus");
+  }, [focused]);
+
+  useEffect(() => {
+    sound.setScene(revealed, ticketOpen || puzzleOpen);
+  }, [revealed, ticketOpen, puzzleOpen]);
+
+  const firstVenue = useRef(true);
+  useEffect(() => {
+    if (firstVenue.current) {
+      firstVenue.current = false;
+      return;
+    }
+    sound.play("venue", venue === "sky" ? 0.85 : venue === "boiler" ? 0.75 : 1);
+  }, [venue]);
+
+  const firstPanel = useRef(true);
+  useEffect(() => {
+    if (firstPanel.current) {
+      firstPanel.current = false;
+      return;
+    }
+    sound.play(panelOpen ? "panel-open" : "panel-close");
+  }, [panelOpen]);
+
+  useEffect(() => {
+    if (ticketOpen) sound.play("ticket");
+  }, [ticketOpen]);
 
   const replay = () => {
+    sound.play("replay");
     setTicketOpen(false);
     setSaved([]);
     setOpenEvent(null);
@@ -140,6 +208,7 @@ export function App() {
       <header className="pointer-events-none fixed top-0 left-0 z-10 p-4 sm:p-6">
         <p className="text-[1.35rem] font-black tracking-[-0.02em] sm:text-3xl">AFTERIMAGE</p>
         <p className="eyebrow mt-1">The Observatory · 16–17 Oct · a fictional festival</p>
+        <MuteToggle />
       </header>
       <p className="sr-only" aria-live="polite">
         {focused ? "Lens in focus. The festival identity has resolved." : ""}
@@ -159,21 +228,27 @@ export function App() {
         open={panelOpen}
         onOpenChange={setPanelOpen}
         tab={tab}
-        onTab={setTab}
+        onTab={clicked(setTab)}
         saved={saved}
         onToggle={toggle}
         onKeep={keep}
         day={day}
-        onDay={setDay}
+        onDay={clicked(setDay)}
         venue={venue}
         onVenue={setVenue}
         openEvent={openEvent}
-        onOpenEvent={setOpenEvent}
+        onOpenEvent={(id) => {
+          sound.play("tick");
+          setOpenEvent(id);
+        }}
         pass={pass}
         onPass={choosePass}
         composition={composition}
         onIssue={() => setTicketOpen(true)}
-        onPuzzle={() => setPuzzleOpen(true)}
+        onPuzzle={() => {
+          sound.play("click");
+          setPuzzleOpen(true);
+        }}
         stamp={stamp}
       />
       <TicketDialog

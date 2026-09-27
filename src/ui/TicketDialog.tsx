@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { sound } from "../audio/sound";
 import type { Composition } from "../game/composition";
 import { demoTicket, type PassId } from "../game/passes";
 import { timeRange, venueById } from "../game/programme";
@@ -41,6 +42,7 @@ export function TicketDialog({ open, onClose, saved, pass, composition, onReplay
 
   const copyLink = async () => {
     const url = `${window.location.origin}${window.location.pathname}${encodeState({ saved, event: null })}`;
+    sound.play("copy");
     setCopied((await copyText(url)) ? "done" : "failed");
   };
 
@@ -82,7 +84,10 @@ export function TicketDialog({ open, onClose, saved, pass, composition, onReplay
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => downloadPoster(composition)}
+                onClick={() => {
+                  sound.play("copy");
+                  downloadPoster(composition);
+                }}
               >
                 Download poster
               </button>

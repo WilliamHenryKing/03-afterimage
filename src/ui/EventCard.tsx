@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { sound } from "../audio/sound";
 import { dayName, type MotifKind, type Performance, timeRange, venueById } from "../game/programme";
 import { clashesWith } from "../game/schedule";
 import { encodeState } from "../game/share";
@@ -27,6 +28,7 @@ export function EventCard({ p, saved, open, onOpen, onToggle }: Props) {
 
   const copyLink = async () => {
     const url = `${window.location.origin}${window.location.pathname}${encodeState({ saved: [], event: p.id })}`;
+    sound.play("copy");
     setCopied((await copyText(url)) ? "done" : "failed");
   };
 

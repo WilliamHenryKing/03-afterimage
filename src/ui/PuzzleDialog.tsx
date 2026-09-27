@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { sound } from "../audio/sound";
 import {
   type Cell,
   interact,
@@ -125,13 +126,18 @@ export function PuzzleDialog({ open, onClose, onSolvedAll }: Props) {
   const last = index === PUZZLE_COUNT - 1;
 
   const go = (i: number) => {
+    sound.play("click");
     setIndex(i);
     setBoard(loadBoard(i));
   };
   const act = (x: number, y: number) => {
+    const cell = board.cells[y * board.width + x];
     const next = interact(board, x, y);
     setBoard(next);
-    if (last && traceBeam(next).end === "target") onSolvedAll();
+    const lit = traceBeam(next).end === "target";
+    if (lit) sound.play(last ? "puzzle-done" : "beam-lit");
+    else sound.play(cell === "o" || cell === "x" ? "shutter" : "mirror");
+    if (last && lit) onSolvedAll();
   };
   const points = trace.path.map((p) => `${(p.x + 0.5) * 100},${(p.y + 0.5) * 100}`).join(" ");
 
