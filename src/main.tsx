@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import { worldReady } from "./loader";
+import { App } from "./ui/App";
+import "./ui/styles.css";
 
-// Placeholder until the game is built (BRIEF.md).
+// The App mounts the three.js stage; the arrival veil lifts after its first rendered frame.
 const root = document.getElementById("root");
-if (root) createRoot(root).render(<main style={{ padding: 24 }}>Under construction.</main>);
-requestAnimationFrame(() => worldReady());
+if (root) createRoot(root).render(<App />);

@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #07080c;
+  --color-ink-2: #0f1117;
+  --color-paper: #f1ece0;
+  --color-muted: #a39f95;
+  --color-foil: #d8b46a;
+  --color-glass: #8fd8ff;
+  --color-copper: #f0935a;
+  --color-sky: #a99bff;
+  --color-clash: #ff6b7d;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-foil);
+  outline-offset: 2px;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  display: block;
+}
+
+.stage.is-dragging {
+  cursor: grabbing;
+}
+
+.stage:focus-visible {
+  outline-offset: -6px;
+}
+
+/* Hairline "optical glass" surface shared by panels and cards. */
+.glass {
+  background: linear-gradient(160deg, rgb(20 22 30 / 0.92), rgb(8 9 13 / 0.94));
+  border: 1px solid rgb(241 236 224 / 0.12);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 20px 60px rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(14px);
+}
+
+.chip {
+  border: 1px solid rgb(241 236 224 / 0.2);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  min-height: 36px;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border-color: var(--color-paper);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    transform 0.15s,
+    background 0.2s,
+    opacity 0.2s;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: linear-gradient(100deg, #f1ece0, #e2c98f 45%, #f1ece0 55%, #d8b46a);
+  color: var(--color-ink);
+}
+
+.btn-ghost {
+  border: 1px solid rgb(241 236 224 / 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.sweep {
+  position: fixed;
+  pointer-events: none;
+  white-space: nowrap;
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(241 236 224 / 0.55);
+  text-shadow:
+    -6px 0 rgb(255 51 85 / 0.18),
+    6px 0 rgb(51 119 255 / 0.18);
+}
+
+dialog::backdrop {
+  background: rgb(3 4 6 / 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(241 236 224 / 0.2) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must beat utility classes */
+    transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must beat utility classes */
+    animation-duration: 0.01ms !important;
+  }
+}
