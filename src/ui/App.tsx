@@ -35,6 +35,7 @@ export function App() {
   const [focused, setFocused] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [pass, setPass] = useState<PassId>(recommendPass(initial.saved));
+  const [passChosen, setPassChosen] = useState(false);
   const [ticketOpen, setTicketOpen] = useState(false);
   const [puzzleOpen, setPuzzleOpen] = useState(false);
   const [stamp, setStamp] = useState(false);
@@ -100,10 +101,17 @@ export function App() {
     window.history.replaceState(null, "", hash || window.location.pathname);
   }, [saved, openEvent]);
 
-  // Keep the chosen pass valid as the night changes.
+  // Follow the night with the best-fitting pass until the visitor picks one; never leave it invalid.
   useEffect(() => {
-    setPass((current) => (passCovers(current, saved) ? current : recommendPass(saved)));
-  }, [saved]);
+    setPass((current) =>
+      passChosen && passCovers(current, saved) ? current : recommendPass(saved),
+    );
+  }, [saved, passChosen]);
+
+  const choosePass = useCallback((p: PassId) => {
+    setPass(p);
+    setPassChosen(true);
+  }, []);
 
   const toggle = useCallback((id: string) => setSaved((s) => toggleSaved(s, id)), []);
   const keep = useCallback((id: string) => setSaved((s) => keepOnly(s, id)), []);
@@ -117,6 +125,7 @@ export function App() {
     setTab("programme");
     setPanelOpen(false);
     setRevealed(false);
+    setPassChosen(false);
     stageRef.current?.resetLens();
   };
 
@@ -161,7 +170,7 @@ export function App() {
         openEvent={openEvent}
         onOpenEvent={setOpenEvent}
         pass={pass}
-        onPass={setPass}
+        onPass={choosePass}
         composition={composition}
         onIssue={() => setTicketOpen(true)}
         onPuzzle={() => setPuzzleOpen(true)}

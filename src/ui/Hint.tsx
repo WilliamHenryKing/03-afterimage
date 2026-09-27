@@ -17,14 +17,15 @@ export function Hint({ focused, firstVisit, wide, right, bottom, onFocus, onSkip
       style={{ right, bottom: bottom + (wide ? 40 : 16) }}
     >
       {firstVisit ? (
-        <div className="glass pointer-events-auto max-w-sm rounded-2xl p-5 text-center">
+        <div className="glass pointer-events-auto max-w-sm rounded-2xl p-4 text-center sm:p-5">
           <p className="eyebrow">Projectionist's hint</p>
-          <p className="mt-2 text-xl font-extrabold tracking-tight">Move the lens</p>
-          <p className="mt-2 text-sm leading-relaxed text-paper/80">
-            {wide ? "Drag" : "Drag with a finger"} anywhere on the observatory to bring the split
-            light into focus. Arrow keys work too; Enter focuses it for you.
+          <p className="mt-1 text-xl font-extrabold tracking-tight">Move the lens</p>
+          <p className="mt-1 text-sm leading-relaxed text-paper/80">
+            {wide
+              ? "Drag anywhere on the observatory to bring the split light into focus. Arrow keys work too; Enter focuses it for you."
+              : "Drag across the observatory to pull the split light into focus."}
           </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
             <button type="button" className="btn btn-primary" onClick={onFocus}>
               Focus for me
             </button>

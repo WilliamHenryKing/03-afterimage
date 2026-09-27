@@ -4,9 +4,9 @@ import * as THREE from "three";
 import type { LensPos } from "../game/lens";
 import { beamMaterial, glowSprite, type Materials } from "./materials";
 
-const LENS_HOME = new THREE.Vector3(0, 4.3, 2.4);
-const LENS_TRAVEL = new THREE.Vector2(2.6, 1.7);
-const PROJECTOR = new THREE.Vector3(0, 1.75, 7.4);
+const LENS_HOME = new THREE.Vector3(0, 1.85, 2.4);
+const LENS_TRAVEL = new THREE.Vector2(2.6, 0.8);
+const PROJECTOR = new THREE.Vector3(0, 1.0, 7.4);
 export const SCREEN_CENTER = new THREE.Vector3(0, 4.5, -4.2);
 const SCREEN_W = 3.6;
 const SCREEN_H = 4.8;
@@ -94,7 +94,7 @@ export class Projection {
   private readonly throwBeam: Beam;
   private readonly splits: Beam[];
   private readonly splashes: THREE.Sprite[];
-  private readonly rod: THREE.Mesh;
+  private readonly stand: THREE.Mesh;
   private readonly landing = new THREE.Vector3();
 
   constructor(m: Materials, poster: HTMLCanvasElement) {
@@ -146,8 +146,8 @@ export class Projection {
     projector.add(body, barrel, reel);
     for (let i = 0; i < 3; i++) {
       const a = (i / 3) * Math.PI * 2;
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.9, 6), m.iron);
-      leg.position.set(Math.cos(a) * 0.35, -1.0, Math.sin(a) * 0.35);
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.1, 6), m.iron);
+      leg.position.set(Math.cos(a) * 0.35, -0.55, Math.sin(a) * 0.35);
       leg.rotation.set(Math.sin(a) * 0.2, 0, -Math.cos(a) * 0.2);
       projector.add(leg);
     }
@@ -162,20 +162,23 @@ export class Projection {
     this.group.add(aperture);
 
     // The great lens: glass, rim and yoke, hung from a rod.
-    const glass = new THREE.Mesh(new THREE.SphereGeometry(1.2, 48, 24), m.glass);
+    const glass = new THREE.Mesh(new THREE.SphereGeometry(1.0, 48, 24), m.glass);
     glass.scale.z = 0.16;
     glass.renderOrder = 2;
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(1.24, 0.09, 16, 96), m.brass);
-    const yoke = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.05, 8, 64, Math.PI), m.iron);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(1.04, 0.08, 16, 96), m.brass);
+    const yoke = new THREE.Mesh(new THREE.TorusGeometry(1.24, 0.05, 8, 64, Math.PI), m.iron);
     rim.castShadow = true;
     yoke.castShadow = true;
     this.lens.add(glass, rim, yoke);
-    this.rod = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1, 8), m.iron);
-    this.rod.geometry.translate(0, 0.5, 0);
-    this.group.add(this.lens, this.rod);
+    yoke.rotation.z = Math.PI;
+    // A floor stand carries the lens, so nothing crosses the projected image.
+    this.stand = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 1, 10), m.iron);
+    this.stand.geometry.translate(0, 0.5, 0);
+    this.stand.castShadow = true;
+    this.group.add(this.lens, this.stand);
 
-    this.throwBeam = makeBeam("#fff1d6", 0.12, 1.05);
-    this.splits = CHANNELS.map((c) => makeBeam(c.colour, 1.0, 2.1));
+    this.throwBeam = makeBeam("#fff1d6", 0.12, 0.9);
+    this.splits = CHANNELS.map((c) => makeBeam(c.colour, 0.85, 2.1));
     this.splashes = CHANNELS.map((c) => glowSprite(c.colour, 3.4));
     this.group.add(this.throwBeam.mesh, ...this.splits.map((b) => b.mesh), ...this.splashes);
   }
@@ -185,8 +188,8 @@ export class Projection {
     const offset = new THREE.Vector3(pos.x * LENS_TRAVEL.x, pos.y * LENS_TRAVEL.y, 0);
     this.lens.position.copy(LENS_HOME).add(offset);
     this.lens.rotation.set(-pos.y * 0.25, pos.x * 0.35, 0);
-    this.rod.position.copy(this.lens.position).add(new THREE.Vector3(0, 1.24, 0));
-    this.rod.scale.y = 13 - this.rod.position.y;
+    this.stand.position.set(this.lens.position.x, 0, this.lens.position.z);
+    this.stand.scale.y = Math.max(0.01, this.lens.position.y - 1.24);
 
     aim(this.throwBeam, PROJECTOR, this.lens.position);
     this.throwBeam.intensity.value = 0.55;

@@ -62,7 +62,7 @@ export function TicketDialog({ open, onClose, saved, pass, composition, onReplay
             <ol className="mt-5 flex flex-col gap-2 border-y border-paper/10 py-4">
               {itinerary(saved).map((p) => (
                 <li key={p.id} className="flex items-baseline gap-3 text-sm">
-                  <span className="w-24 shrink-0 font-mono text-xs text-muted">
+                  <span className="shrink-0 font-mono text-xs whitespace-nowrap text-muted">
                     {p.day === "fri" ? "Fri" : "Sat"} {timeRange(p)}
                   </span>
                   <span className="min-w-0 flex-1 font-bold">{p.title}</span>

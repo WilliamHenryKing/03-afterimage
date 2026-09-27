@@ -48,7 +48,7 @@ export function createStage(
   renderer.toneMapping = THREE.AgXToneMapping;
   renderer.toneMappingExposure = 1.15;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#05060a");
@@ -89,6 +89,8 @@ export function createStage(
   let focused = false;
   let insets = { right: 0, bottom: 0 };
   let lensTween: gsap.core.Tween | null = null;
+  let distance = 1;
+  const base = shot.pos.clone();
 
   function resize() {
     const w = canvas.clientWidth;
@@ -99,8 +101,11 @@ export function createStage(
     const areaH = Math.max(1, h - insets.bottom);
     const aspect = areaW / areaH;
     camera.aspect = w / h;
-    // Narrow portrait areas need a wider lens to keep the screen and lens in view.
-    camera.fov = aspect < 0.9 ? 58 : aspect < 1.3 ? 50 : 42;
+    // Hold a horizontal field of view so portrait phones still see the lens and the screen.
+    const hfov = THREE.MathUtils.degToRad(44);
+    const vfov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(hfov / 2) / aspect));
+    camera.fov = THREE.MathUtils.clamp(vfov, 38, 74);
+    distance = aspect < 0.8 ? 0.88 : 1;
     camera.setViewOffset(w, h, insets.right / 2, insets.bottom / 2, w, h);
     camera.updateProjectionMatrix();
   }
@@ -177,19 +182,21 @@ export function createStage(
   canvas.addEventListener("pointercancel", onUp);
   canvas.addEventListener("keydown", onKey);
 
-  const clock = new THREE.Clock();
+  const timer = new THREE.Timer();
   let firstFrame = true;
   let cameraTween: gsap.core.Timeline | null = null;
 
-  renderer.setAnimationLoop(() => {
-    const dt = Math.min(clock.getDelta(), 0.1);
-    const t = clock.elapsedTime;
+  renderer.setAnimationLoop((now) => {
+    timer.update(now);
+    const dt = Math.min(timer.getDelta(), 0.1);
+    const t = timer.getElapsed();
     const target = 1 - Math.min(1, separation(lens) / 0.55);
     focus += (target - focus) * (reduced ? 1 : 1 - Math.exp(-dt * 8));
     // A slow breath in the lens hanger when idle, never enough to lose focus.
     const sway = reduced || drag ? 0 : Math.sin(t * 0.7) * 0.006;
     projection.update({ x: lens.x + sway, y: lens.y }, focus, t);
     venues.update(t, reduced);
+    camera.position.copy(base).sub(look).multiplyScalar(distance).add(look);
     camera.lookAt(look);
     renderer.render(scene, camera);
     if (firstFrame) {
@@ -206,7 +213,7 @@ export function createStage(
       const d = reduced ? 0 : 1.6;
       cameraTween = gsap
         .timeline({ defaults: { duration: d, ease: "power3.inOut" } })
-        .to(camera.position, { x: next.pos.x, y: next.pos.y, z: next.pos.z }, 0)
+        .to(base, { x: next.pos.x, y: next.pos.y, z: next.pos.z }, 0)
         .to(look, { x: next.look.x, y: next.look.y, z: next.look.z }, 0);
     },
     setSaved(ids) {

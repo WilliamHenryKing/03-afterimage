@@ -18,7 +18,7 @@ export function makeMaterials() {
     iron: new THREE.MeshStandardMaterial({ color: "#23242a", roughness: 0.45, metalness: 0.8 }),
     brass: new THREE.MeshStandardMaterial({ color: PALETTE.brass, roughness: 0.32, metalness: 1 }),
     copper: new THREE.MeshStandardMaterial({ color: PALETTE.copper, roughness: 0.3, metalness: 1 }),
-    mirror: new THREE.MeshStandardMaterial({ color: "#d9dde4", roughness: 0.08, metalness: 1 }),
+    mirror: new THREE.MeshStandardMaterial({ color: "#4a4f58", roughness: 0.12, metalness: 1 }),
     glass: new THREE.MeshPhysicalMaterial({
       color: "#cfeaff",
       roughness: 0.04,

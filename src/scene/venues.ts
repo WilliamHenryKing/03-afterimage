@@ -15,10 +15,10 @@ const DECK_LOW = 0.8;
 const DECK_HIGH = 2.3;
 
 export const CAMERA_SHOTS: Record<VenueFilter, { pos: THREE.Vector3; look: THREE.Vector3 }> = {
-  all: { pos: new THREE.Vector3(0, 3.9, 10.4), look: new THREE.Vector3(0, 3.9, -1) },
-  lens: { pos: new THREE.Vector3(0.9, 4.3, 8.4), look: new THREE.Vector3(0, 4.4, -1) },
-  boiler: { pos: new THREE.Vector3(-2.2, 3, 7.2), look: new THREE.Vector3(-6.4, 2.6, -1.2) },
-  sky: { pos: new THREE.Vector3(2.6, 5, 7.6), look: new THREE.Vector3(6.4, 4.4, -1.4) },
+  all: { pos: new THREE.Vector3(0, 4.3, 12.4), look: new THREE.Vector3(0, 3.7, -1) },
+  lens: { pos: new THREE.Vector3(1.4, 3.2, 8.6), look: new THREE.Vector3(0, 3.3, -1) },
+  boiler: { pos: new THREE.Vector3(-1.6, 3.4, 9), look: new THREE.Vector3(-6.2, 2.4, -1.2) },
+  sky: { pos: new THREE.Vector3(2.4, 5.4, 9.2), look: new THREE.Vector3(6.4, 4.2, -1.4) },
 };
 
 function twistedRibbon(length: number, turns: number): THREE.BufferGeometry {
@@ -60,8 +60,8 @@ export class Venues {
     this.group.add(...Object.values(this.lights));
 
     // The Lens: optical rings around the great lens that swing into alignment.
-    [1.75, 2.1, 2.45].forEach((r, i) => {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.035, 8, 96), m.brass);
+    [1.18, 1.32, 1.46].forEach((r, i) => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.025, 8, 96), m.brass);
       ring.rotation.set(0.9 + i * 0.4, 0.6 - i * 0.5, 0);
       ring.castShadow = true;
       lens.add(ring);
