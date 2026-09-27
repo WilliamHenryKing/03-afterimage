@@ -67,7 +67,7 @@ function dominantVenue(saved: readonly string[]): Composition["dominant"] {
 function layerFor(p: Performance, index: number, total: number, key: number): Layer {
   const seed = (hash(`${p.id}:${key}`) % 1000) / 1000;
   // Layers stack down the poster in running order; the authored angle turns with the night's key.
-  const y = total <= 1 ? 0.42 : 0.18 + (index / (total - 1)) * 0.52;
+  const y = total <= 1 ? 0.48 : 0.32 + (index / (total - 1)) * 0.34;
   return {
     kind: p.motif.kind,
     hue: p.motif.hue,
