@@ -22,7 +22,8 @@ export function buildLighting(
   scene.fog = new THREE.FogExp2("#0d1020", 0.024);
 
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const envTarget = pmrem.fromScene(new RoomEnvironment(), 0.04);
+  // Reflections only need a soft room; a 128px source halves the prefilter work of the default.
+  const envTarget = pmrem.fromScene(new RoomEnvironment(), 0.04, 0.1, 100, { size: 128 });
   scene.environment = envTarget.texture;
   scene.environmentIntensity = 0.34;
 

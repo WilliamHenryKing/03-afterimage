@@ -189,7 +189,7 @@ export function createStage(
   let firstFrame = true;
   let cameraTween: gsap.core.Timeline | null = null;
 
-  renderer.setAnimationLoop((now) => {
+  const frame = (now: number) => {
     timer.update(now);
     const dt = Math.min(timer.getDelta(), 0.1);
     const t = timer.getElapsed();
@@ -212,7 +212,15 @@ export function createStage(
       firstFrame = false;
       events.onFirstFrame();
     }
-  });
+  };
+
+  // Compile every visible material in parallel (KHR_parallel_shader_compile where available)
+  // before the first frame, instead of stalling that frame on a queue of synchronous compiles.
+  let disposed = false;
+  const start = () => {
+    if (!disposed) renderer.setAnimationLoop(frame);
+  };
+  renderer.compileAsync(scene, camera).then(start, start);
 
   return {
     setVenue(v) {
@@ -246,6 +254,7 @@ export function createStage(
       animateLens(LENS_START, 1.2);
     },
     dispose() {
+      disposed = true;
       renderer.setAnimationLoop(null);
       observer.disconnect();
       canvas.removeEventListener("pointerdown", onDown);
