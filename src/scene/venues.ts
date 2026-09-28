@@ -1,7 +1,7 @@
 // The three spaces, their stage transformations and the beacons that mark saved performances.
 import gsap from "gsap";
 import * as THREE from "three";
-import { PROGRAMME, type VenueId, venueById } from "../game/programme";
+import { PROGRAMME, type VenueId } from "../game/programme";
 import type { VenueFilter } from "../game/schedule";
 import type { Architecture } from "./architecture";
 import type { Materials } from "./materials";
@@ -9,7 +9,7 @@ import type { Materials } from "./materials";
 const ANCHORS: Record<VenueId, THREE.Vector3> = {
   lens: new THREE.Vector3(0, 0.55, 4.6),
   boiler: new THREE.Vector3(-5.6, 0.55, 1.8),
-  sky: new THREE.Vector3(6.2, 0.55, 1.4),
+  sky: new THREE.Vector3(6.2, 0.55, -0.7),
 };
 const DECK_LOW = 0.8;
 const DECK_HIGH = 2.3;
@@ -37,28 +37,18 @@ function twistedRibbon(length: number, turns: number): THREE.BufferGeometry {
 
 export class Venues {
   readonly group = new THREE.Group();
-  private readonly lights: Record<VenueId, THREE.PointLight>;
   private readonly rings: THREE.Mesh[] = [];
   private readonly ribbons: THREE.Mesh[] = [];
-  readonly deck = new THREE.Group();
   private readonly beacons = new Map<string, THREE.Mesh>();
+  private readonly stands = new Map<string, THREE.Mesh>();
   private timeline: gsap.core.Timeline | null = null;
 
   constructor(
     m: Materials,
     lens: THREE.Group,
     private readonly arch: Architecture,
+    readonly deck: THREE.Group,
   ) {
-    this.lights = {
-      lens: new THREE.PointLight(venueById("lens").colour, 6, 12, 1.6),
-      boiler: new THREE.PointLight("#ff7a3a", 10, 14, 1.6),
-      sky: new THREE.PointLight(venueById("sky").colour, 8, 14, 1.6),
-    };
-    this.lights.lens.position.set(0, 6.5, 3);
-    this.lights.boiler.position.set(-6, 3.2, 1);
-    this.lights.sky.position.set(6.2, 5.2, 0.6);
-    this.group.add(...Object.values(this.lights));
-
     // The Lens: optical rings around the great lens that swing into alignment.
     [1.18, 1.32, 1.46].forEach((r, i) => {
       const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.025, 8, 96), m.brass);
@@ -68,64 +58,18 @@ export class Venues {
       this.rings.push(ring);
     });
 
-    this.buildBoiler(m);
-    this.buildDeck(m);
-    this.buildBeacons();
+    this.buildRibbons();
+    this.deck.position.set(6.4, DECK_LOW, -0.2);
+    this.group.add(this.deck);
+    this.buildBeacons(m);
   }
 
-  private buildBoiler(m: Materials) {
-    const boiler = new THREE.Group();
-    const tanks: [number, number, number, number][] = [
-      [-7.6, 1.7, -1.6, 0.95],
-      [-5.4, 1.3, -2.8, 0.75],
-      [-8.6, 1.2, 1.2, 0.7],
-    ];
-    for (const [x, y, z, r] of tanks) {
-      const tank = new THREE.Mesh(new THREE.CapsuleGeometry(r, y * 1.4, 8, 24), m.copper);
-      tank.position.set(x, y + 0.2, z);
-      tank.castShadow = true;
-      boiler.add(tank);
-      const band = new THREE.Mesh(new THREE.TorusGeometry(r + 0.03, 0.05, 8, 48), m.brass);
-      band.rotation.x = Math.PI / 2;
-      band.position.set(x, y, z);
-      boiler.add(band);
-    }
-    const routes: [number, number, number][][] = [
-      [
-        [-7.6, 3.4, -1.6],
-        [-7.4, 6.2, -1.4],
-        [-4.2, 7.0, -2.2],
-        [-1.8, 7.4, -3.4],
-      ],
-      [
-        [-5.4, 2.6, -2.8],
-        [-5.2, 5.0, -3.4],
-        [-3.0, 5.6, -4.0],
-      ],
-      [
-        [-8.6, 2.2, 1.2],
-        [-8.9, 5.4, 0.6],
-        [-9.6, 7.0, -1.8],
-      ],
-      [
-        [-9.8, 0.3, -3.2],
-        [-7.2, 0.6, -3.6],
-        [-4.6, 0.4, -3.2],
-        [-3.2, 2.2, -3.8],
-      ],
-    ];
-    for (const route of routes) {
-      const curve = new THREE.CatmullRomCurve3(
-        route.map(([x, y, z]) => new THREE.Vector3(x, y, z)),
-      );
-      const pipe = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.11, 10), m.copper);
-      pipe.castShadow = true;
-      boiler.add(pipe);
-    }
-    const foil = new THREE.MeshStandardMaterial({
-      color: "#d8b46a",
+  private buildRibbons() {
+    // Foil ribbons over the boilers: an installation that unfurls when the Boiler Room is chosen.
+    const foil = new THREE.MeshPhysicalMaterial({
+      color: "#e6c27a",
       metalness: 1,
-      roughness: 0.22,
+      roughness: 0.18,
       side: THREE.DoubleSide,
     });
     for (let i = 0; i < 5; i++) {
@@ -133,68 +77,46 @@ export class Venues {
       ribbon.position.set(-4.4 - i * 1.1, 7, -3.4 + Math.sin(i * 1.7) * 0.6);
       ribbon.scale.y = 0.001;
       ribbon.visible = false;
-      boiler.add(ribbon);
+      this.group.add(ribbon);
       this.ribbons.push(ribbon);
     }
-    this.group.add(boiler);
   }
 
-  private buildDeck(m: Materials) {
-    const top = new THREE.Mesh(new THREE.BoxGeometry(5, 0.22, 3.8), m.iron);
-    top.receiveShadow = true;
-    top.castShadow = true;
-    this.deck.add(top);
-    for (const [x, z] of [
-      [-2.3, -1.7],
-      [2.3, -1.7],
-      [-2.3, 1.7],
-      [2.3, 1.7],
-    ] as const) {
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.14, 3, 0.14), m.iron);
-      leg.position.set(x, -1.5, z);
-      this.deck.add(leg);
-    }
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(5, 0.05, 0.05), m.brass);
-    rail.position.set(0, 1, 1.85);
-    this.deck.add(rail);
-    for (let i = 0; i <= 8; i++) {
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1, 6), m.brass);
-      post.position.set(-2.5 + i * 0.625, 0.5, 1.85);
-      this.deck.add(post);
-    }
-    const blanket = new THREE.MeshStandardMaterial({ color: "#3a3170", roughness: 0.95 });
-    for (let i = 0; i < 4; i++) {
-      const b = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.08, 0.8), blanket);
-      b.position.set(-1.6 + i * 1.1, 0.15, -0.4 + (i % 2) * 0.7);
-      b.rotation.y = (i - 1.5) * 0.25;
-      this.deck.add(b);
-    }
-    this.deck.position.set(6.4, DECK_LOW, -0.2);
-    this.group.add(this.deck);
-  }
-
-  private buildBeacons() {
-    const geo = new THREE.OctahedronGeometry(0.16, 0);
+  private buildBeacons(m: Materials) {
+    const geo = new THREE.OctahedronGeometry(0.14, 0);
+    const standGeo = new THREE.CylinderGeometry(0.012, 0.05, 1, 10);
+    standGeo.translate(0, 0.5, 0);
     const perVenue: Record<VenueId, number> = { lens: 0, boiler: 0, sky: 0 };
     for (const p of PROGRAMME) {
       const i = perVenue[p.venue]++;
+      // A light token in the performance's colour (an emitter), held on a brass stand.
       const mesh = new THREE.Mesh(
         geo,
-        new THREE.MeshBasicMaterial({ color: new THREE.Color(p.motif.hue).multiplyScalar(2.2) }),
+        new THREE.MeshStandardMaterial({
+          color: "#111111",
+          emissive: p.motif.hue,
+          emissiveIntensity: 6,
+          roughness: 0.3,
+        }),
       );
       mesh.position.copy(ANCHORS[p.venue]).add(new THREE.Vector3((i - 1.5) * 0.55, 0, i % 2));
       mesh.userData.baseY = mesh.position.y;
       mesh.scale.setScalar(0.001);
       mesh.visible = false;
-      this.group.add(mesh);
+      const stand = new THREE.Mesh(standGeo, m.brass);
+      stand.position.set(mesh.position.x, 0, mesh.position.z);
+      stand.visible = false;
+      stand.castShadow = true;
+      this.group.add(mesh, stand);
       this.beacons.set(p.id, mesh);
+      this.stands.set(p.id, stand);
     }
   }
 
   /** Beacon height follows the deck so Sky Deck tokens sit on it. */
   private beaconLift(id: string): number {
     const p = PROGRAMME.find((q) => q.id === id);
-    return p?.venue === "sky" ? this.deck.position.y + 0.2 : 0;
+    return p?.venue === "sky" ? this.deck.position.y + 0.11 : 0;
   }
 
   setSaved(ids: readonly string[], reduced: boolean) {
@@ -202,6 +124,8 @@ export class Venues {
       const on = ids.includes(id);
       const target = on ? 1 : 0.001;
       if (on) mesh.visible = true;
+      const stand = this.stands.get(id);
+      if (stand) stand.visible = on;
       gsap.to(mesh.scale, {
         x: target,
         y: target,
@@ -220,10 +144,6 @@ export class Venues {
     this.timeline?.kill();
     const d = reduced ? 0 : 1.6;
     const tl = gsap.timeline({ defaults: { duration: d, ease: "power3.inOut" } });
-    const level = (id: VenueId) => (v === "all" ? 0.55 : v === id ? 1.4 : 0.18);
-    tl.to(this.lights.lens, { intensity: 6 * level("lens") }, 0);
-    tl.to(this.lights.boiler, { intensity: 10 * level("boiler") }, 0);
-    tl.to(this.lights.sky, { intensity: 8 * level("sky") }, 0);
 
     this.rings.forEach((ring, i) => {
       const aligned = v === "lens";
@@ -253,7 +173,7 @@ export class Venues {
     const open = v === "sky";
     tl.to(this.deck.position, { y: open ? DECK_HIGH : DECK_LOW }, 0);
     tl.to(this.arch.shutter.rotation, { y: open ? 0.7 : 0 }, 0);
-    tl.to(this.arch.stars.material, { opacity: open ? 0.95 : 0.12 }, reduced ? 0 : 0.4);
+    tl.to(this.arch.sky, { value: open ? 1 : 0.15 }, reduced ? 0 : 0.4);
     this.timeline = tl;
   }
 
@@ -261,9 +181,15 @@ export class Venues {
   update(time: number, reduced: boolean) {
     for (const [id, mesh] of this.beacons) {
       if (!mesh.visible) continue;
-      const base = (mesh.userData.baseY as number) + this.beaconLift(id);
-      mesh.position.y = base + (reduced ? 0 : Math.sin(time * 1.6 + mesh.position.x) * 0.08);
+      const lift = this.beaconLift(id);
+      const base = (mesh.userData.baseY as number) + lift;
+      mesh.position.y = base + (reduced ? 0 : Math.sin(time * 1.6 + mesh.position.x) * 0.03);
       if (!reduced) mesh.rotation.y = time * 0.8;
+      const stand = this.stands.get(id);
+      if (stand) {
+        stand.position.y = lift;
+        stand.scale.y = Math.max(0.01, mesh.position.y - lift - 0.1);
+      }
     }
   }
 }

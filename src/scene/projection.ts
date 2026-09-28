@@ -2,6 +2,7 @@
 // its primaries and spills across the architecture; in focus it resolves into the identity.
 import * as THREE from "three";
 import type { LensPos } from "../game/lens";
+import { model } from "./assets";
 import { Haze } from "./haze";
 import { beamMaterial, glowSprite, type Materials } from "./materials";
 
@@ -101,6 +102,9 @@ export class Projection {
   private readonly splits: Beam[];
   private readonly splashes: THREE.Sprite[];
   private readonly stand: THREE.Mesh;
+  private readonly standBase: THREE.Mesh;
+  private readonly projector = new THREE.Group();
+  private readonly standIn = new THREE.Group();
   private readonly landing = new THREE.Vector3();
 
   constructor(m: Materials, poster: HTMLCanvasElement) {
@@ -115,7 +119,7 @@ export class Projection {
         uSplit: { value: new THREE.Vector2() },
         uSpot: { value: new THREE.Vector2(0.5, 0.5) },
         uFocus: { value: 0 },
-        uGain: { value: 1.7 },
+        uGain: { value: 1.0 },
       },
       vertexShader: SCREEN_VERTEX,
       fragmentShader: SCREEN_FRAGMENT,
@@ -141,50 +145,101 @@ export class Projection {
       this.group.add(leg);
     }
 
-    // Projector on its tripod.
-    const projector = new THREE.Group();
+    // Projector on its tripod: a procedural stand-in until the sourced 8 mm projector loads.
+    this.projector.position.copy(PROJECTOR).add(new THREE.Vector3(0, 0, 0.9));
+    this.projector.lookAt(LENS_HOME.clone().setY(PROJECTOR.y));
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.6, 1.2), m.iron);
     const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.26, 0.6, 24), m.brass);
     barrel.rotation.x = Math.PI / 2;
     barrel.position.z = 0.85;
-    const reel = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.05, 8, 32), m.brass);
-    reel.position.set(0, 0.62, 0.1);
-    reel.rotation.y = Math.PI / 2;
-    projector.add(body, barrel, reel);
+    this.standIn.add(body, barrel);
+    this.projector.add(this.standIn);
     for (let i = 0; i < 3; i++) {
-      const a = (i / 3) * Math.PI * 2;
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.1, 6), m.iron);
-      leg.position.set(Math.cos(a) * 0.35, -0.55, Math.sin(a) * 0.35);
-      leg.rotation.set(Math.sin(a) * 0.2, 0, -Math.cos(a) * 0.2);
-      projector.add(leg);
+      const a = (i / 3) * Math.PI * 2 + 0.3;
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.03, 1.12, 8), m.brass);
+      leg.position.set(Math.cos(a) * 0.3, -0.53, Math.sin(a) * 0.3);
+      leg.rotation.set(Math.sin(a) * 0.22, 0, -Math.cos(a) * 0.22);
+      this.projector.add(leg);
     }
-    projector.position.copy(PROJECTOR).add(new THREE.Vector3(0, 0, 0.9));
-    projector.lookAt(LENS_HOME.clone().setY(PROJECTOR.y));
-    projector.traverse((o) => {
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.08, 20), m.iron);
+    this.projector.add(head);
+    this.projector.traverse((o) => {
       o.castShadow = true;
     });
-    this.group.add(projector);
-    const aperture = glowSprite("#fff4dc", 1.6);
+    this.group.add(this.projector);
+    // The aperture is the lamp's visible face (an HDR emitter); the lamp also lights the rig.
+    const aperture = new THREE.Mesh(
+      new THREE.CircleGeometry(0.16, 24),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color("#fff4dc").multiplyScalar(30) }),
+    );
     aperture.position.copy(PROJECTOR);
-    const lamp = new THREE.PointLight("#ffe2b0", 5, 6, 1.6);
-    lamp.position.copy(PROJECTOR).add(new THREE.Vector3(0, 0.4, 0.6));
+    aperture.lookAt(LENS_HOME);
+    const lamp = new THREE.PointLight("#ffe2b0", 6, 0, 2);
+    lamp.position.copy(PROJECTOR).add(new THREE.Vector3(0, 0.35, 0.5));
     this.group.add(aperture, lamp, this.haze.points);
 
-    // The great lens: glass, rim and yoke, hung from a rod.
-    const glass = new THREE.Mesh(new THREE.SphereGeometry(1.0, 48, 24), m.glass);
-    glass.scale.z = 0.16;
-    glass.renderOrder = 2;
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(1.04, 0.08, 16, 96), m.brass);
-    const yoke = new THREE.Mesh(new THREE.TorusGeometry(1.24, 0.05, 8, 64, Math.PI), m.iron);
-    rim.castShadow = true;
-    yoke.castShadow = true;
-    this.lens.add(glass, rim, yoke);
+    // The great lens: a biconvex element of dispersive glass in a machined brass cell.
+    const R = 1.0;
+    const profile: THREE.Vector2[] = [];
+    const steps = 24;
+    const sag = (r: number) => 0.025 + 0.13 * (1 - (r / R) ** 2);
+    for (let i = 0; i <= steps; i++)
+      profile.push(new THREE.Vector2((i / steps) * R, sag((i / steps) * R)));
+    for (let i = steps; i >= 0; i--)
+      profile.push(new THREE.Vector2((i / steps) * R, -sag((i / steps) * R)));
+    const glassGeo = new THREE.LatheGeometry(profile, 72);
+    glassGeo.rotateX(Math.PI / 2);
+    const glass = new THREE.Mesh(glassGeo, m.glass);
+    const cellProfile = [
+      [0.97, -0.09],
+      [1.1, -0.09],
+      [1.12, -0.06],
+      [1.12, 0.06],
+      [1.1, 0.09],
+      [0.97, 0.09],
+      [0.97, 0.05],
+      [1.02, 0.05],
+      [1.02, -0.05],
+      [0.97, -0.05],
+    ].map(([x, y]) => new THREE.Vector2(x, y));
+    const cellGeo = new THREE.LatheGeometry(cellProfile, 96);
+    cellGeo.rotateX(Math.PI / 2);
+    const cell = new THREE.Mesh(cellGeo, m.brass);
+    // Knurled grip band and three set screws.
+    const knurl = new THREE.InstancedMesh(new THREE.BoxGeometry(0.018, 0.06, 0.022), m.brass, 120);
+    const t = new THREE.Object3D();
+    for (let i = 0; i < 120; i++) {
+      const a = (i / 120) * Math.PI * 2;
+      t.position.set(Math.cos(a) * 1.125, Math.sin(a) * 1.125, 0);
+      t.rotation.set(0, 0, a);
+      t.updateMatrix();
+      knurl.setMatrixAt(i, t.matrix);
+    }
+    for (let i = 0; i < 3; i++) {
+      const a = (i / 3) * Math.PI * 2 + Math.PI / 2;
+      const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.05, 12), m.iron);
+      screw.position.set(Math.cos(a) * 1.13, Math.sin(a) * 1.13, 0.1);
+      screw.rotation.x = Math.PI / 2;
+      this.lens.add(screw);
+    }
+    const yoke = new THREE.Mesh(new THREE.TorusGeometry(1.24, 0.05, 10, 64, Math.PI), m.iron);
     yoke.rotation.z = Math.PI;
-    // A floor stand carries the lens, so nothing crosses the projected image.
-    this.stand = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 1, 10), m.iron);
+    for (const side of [-1, 1]) {
+      const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.16, 12), m.brass);
+      pin.rotation.z = Math.PI / 2;
+      pin.position.set(side * 1.18, 0, 0);
+      this.lens.add(pin);
+    }
+    for (const o of [cell, knurl, yoke]) o.castShadow = true;
+    this.lens.add(glass, cell, knurl, yoke);
+    // A floor stand on a weighted base carries the lens, so nothing crosses the projected image.
+    this.stand = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 1, 12), m.iron);
     this.stand.geometry.translate(0, 0.5, 0);
     this.stand.castShadow = true;
-    this.group.add(this.lens, this.stand);
+    this.standBase = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.4, 0.07, 32), m.iron);
+    this.standBase.castShadow = true;
+    this.standBase.receiveShadow = true;
+    this.group.add(this.lens, this.stand, this.standBase);
 
     this.throwBeam = makeBeam("#fff1d6", 0.12, 0.9);
     this.splits = CHANNELS.map((c) => makeBeam(c.colour, 0.85, 2.1));
@@ -198,10 +253,11 @@ export class Projection {
     this.lens.position.copy(LENS_HOME).add(offset);
     this.lens.rotation.set(-pos.y * 0.25, pos.x * 0.35, 0);
     this.stand.position.set(this.lens.position.x, 0, this.lens.position.z);
+    this.standBase.position.set(this.lens.position.x, 0.035, this.lens.position.z);
     this.stand.scale.y = Math.max(0.01, this.lens.position.y - 1.24);
 
     aim(this.throwBeam, PROJECTOR, this.lens.position);
-    this.throwBeam.intensity.value = 0.95 + this.flash;
+    this.throwBeam.intensity.value = 0.32 + this.flash * 0.6;
     this.throwBeam.time.value = time;
 
     const spill = 1 - focus;
@@ -214,18 +270,53 @@ export class Projection {
         .addScaledVector(offset, 1 + c.k * 1.8)
         .setZ(SCREEN_CENTER.z + 0.05);
       aim(beam, this.lens.position, this.landing);
-      beam.intensity.value = 0.34 + spill * 0.36 + this.flash * 0.9;
+      beam.intensity.value = 0.22 + spill * 0.3 + this.flash * 0.7;
       beam.time.value = time;
       splash.position.copy(this.landing);
-      splash.material.opacity = Math.min(1, 0.3 + spill * 0.55 + this.flash);
+      splash.material.opacity = Math.min(1, 0.15 + spill * 0.45 + this.flash * 0.6);
       splash.scale.setScalar(3.4 + this.flash * 4);
     });
 
     this.split.value.set(pos.x * 0.12 * spill, pos.y * 0.12 * spill);
     this.spot.value.set(0.5 + pos.x * 0.35, 0.5 + pos.y * 0.35);
     this.focus.value = focus;
-    this.gain.value = 1.9 + this.flash * 2.2;
+    this.gain.value = 1.05 + this.flash * 1.6;
     this.haze.update(PROJECTOR, this.lens.position, SCREEN_CENTER, spill, time, this.pixelRatio);
+  }
+
+  /** Additive light and sprites the AO pass must skip. */
+  get aoHidden(): THREE.Object3D[] {
+    return [
+      this.throwBeam.mesh,
+      ...this.splits.map((b) => b.mesh),
+      ...this.splashes,
+      this.haze.points,
+    ];
+  }
+
+  /** Swap the stand-in for the sourced projector, sized to the rig and aimed down the throw. */
+  async loadDeferred() {
+    const gltf = await model("projector");
+    if (!gltf) return;
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    const size = box.getSize(new THREE.Vector3());
+    const s = 1.25 / Math.max(size.x, size.z);
+    const centre = box.getCenter(new THREE.Vector3());
+    gltf.scene.scale.setScalar(s);
+    gltf.scene.position.set(-centre.x * s, -box.min.y * s - 0.02, -centre.z * s);
+    // The model's lens faces -X; the rig's throw runs along local +Z.
+    gltf.scene.rotation.y = -Math.PI / 2;
+    gltf.scene.traverse((o) => {
+      if (o instanceof THREE.Mesh) {
+        o.castShadow = true;
+        o.receiveShadow = true;
+      }
+    });
+    const mount = new THREE.Group();
+    mount.position.y = 0.04;
+    mount.add(gltf.scene);
+    this.standIn.visible = false;
+    this.projector.add(mount);
   }
 
   posterChanged() {

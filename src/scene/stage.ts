@@ -5,11 +5,13 @@ import * as THREE from "three";
 import { clampLens, FOCAL, isFocused, LENS_START, type LensPos, separation } from "../game/lens";
 import type { VenueFilter } from "../game/schedule";
 import { buildArchitecture } from "./architecture";
+import { within } from "./assets";
 import type { Bookmark } from "./bookmarks";
 import { bindLensInput } from "./input";
-import { buildLighting } from "./lighting";
-import { makeMaterials } from "./materials";
+import { buildLighting, EXPOSURE } from "./lighting";
+import { attachTextures, makeMaterials } from "./materials";
 import { Projection } from "./projection";
+import { initialTier, Pipeline } from "./render/pipeline";
 import { Staging } from "./staging";
 import { CAMERA_SHOTS, Venues } from "./venues";
 import { installVisualTest, visualTestEnabled } from "./visual-test";
@@ -39,10 +41,12 @@ export function createStage(
 ): Stage {
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    antialias: false,
     powerPreference: "high-performance",
+    stencil: false,
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  // Applied once, in OutputPass; the composer's intermediate targets stay linear.
   renderer.toneMapping = THREE.AgXToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -59,9 +63,13 @@ export function createStage(
   const arch = buildArchitecture(materials);
   const projection = new Projection(materials, poster);
   projection.pixelRatio = renderer.getPixelRatio();
-  const venues = new Venues(materials, projection.lens, arch);
-  const staging = new Staging(materials, venues.deck);
+  const staging = new Staging(materials);
+  const venues = new Venues(materials, projection.lens, arch, staging.deck.group);
   scene.add(arch.group, projection.group, venues.group, staging.group);
+
+  const testing = visualTestEnabled();
+  const pipeline = new Pipeline(renderer, scene, camera, initialTier(), !testing);
+  pipeline.hideFromAo([...arch.aoHidden, ...projection.aoHidden, ...staging.aoHidden]);
 
   let reduced = false;
   let lens: LensPos = { ...LENS_START };
@@ -77,7 +85,7 @@ export function createStage(
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     if (w === 0 || h === 0) return;
-    renderer.setSize(w, h, false);
+    pipeline.setSize(w, h);
     const areaW = Math.max(1, w - insets.right);
     const areaH = Math.max(1, h - insets.bottom);
     const aspect = areaW / areaH;
@@ -114,8 +122,8 @@ export function createStage(
     gsap.fromTo(projection, { flash: 1 }, { flash: 0, duration: 1.4, ease: "expo.out" });
     gsap.fromTo(
       renderer,
-      { toneMappingExposure: 2.3 },
-      { toneMappingExposure: 1.6, duration: 1.2, ease: "power2.out" },
+      { toneMappingExposure: EXPOSURE * 1.45 },
+      { toneMappingExposure: EXPOSURE, duration: 1.2, ease: "power2.out" },
     );
   }
 
@@ -150,7 +158,10 @@ export function createStage(
     resolveReady = r;
   });
 
+  let lastNow = 0;
   const frame = (now: number) => {
+    const frameMs = lastNow ? now - lastNow : 0;
+    lastNow = now;
     timer.update(now);
     const dt = frozen ? 0 : Math.min(timer.getDelta(), 0.1);
     const t = frozen ? frozenAt : timer.getElapsed();
@@ -169,11 +180,14 @@ export function createStage(
     staging.update(t, dt, reduced || frozen);
     camera.position.copy(base).sub(look).multiplyScalar(distance).add(look);
     camera.lookAt(look);
-    renderer.render(scene, camera);
+    pipeline.render(frozen ? 0 : frameMs);
     if (firstFrame) {
       firstFrame = false;
       events.onFirstFrame();
-      resolveReady();
+      // Models and the HDRI stream in after the veil lifts; captures wait for them.
+      Promise.all([lighting.loadDeferred(), projection.loadDeferred(), staging.loadDeferred()])
+        .catch(() => undefined)
+        .then(() => resolveReady());
     }
     for (let i = waiters.length - 1; i >= 0; i--) {
       const w = waiters[i];
@@ -184,13 +198,16 @@ export function createStage(
     }
   };
 
-  // Compile every visible material in parallel (KHR_parallel_shader_compile where available)
-  // before the first frame, instead of stalling that frame on a queue of synchronous compiles.
+  // Core textures (capped at 2.5 s so the veil never waits on a slow network), then compile
+  // every visible material in parallel (KHR_parallel_shader_compile where available) before the
+  // first frame, instead of stalling that frame on a queue of synchronous compiles.
   let disposed = false;
   const start = () => {
     if (!disposed) renderer.setAnimationLoop(frame);
   };
-  renderer.compileAsync(scene, camera).then(start, start);
+  within(attachTextures(materials, pipeline.tier === "low"), 2500)
+    .then(() => renderer.compileAsync(scene, camera))
+    .then(start, start);
 
   function setVenue(v: VenueFilter, instant = reduced) {
     venues.setVenue(v, instant);
@@ -204,7 +221,7 @@ export function createStage(
       .to(look, { x: next.look.x, y: next.look.y, z: next.look.z }, 0);
   }
 
-  const removeHook = visualTestEnabled()
+  const removeHook = testing
     ? installVisualTest({
         ready,
         apply(bookmark: Bookmark) {
@@ -235,6 +252,7 @@ export function createStage(
           return {
             renderer: ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : "unknown",
             pixelRatio: renderer.getPixelRatio(),
+            tier: pipeline.tier,
             calls: renderer.info.render.calls,
             triangles: renderer.info.render.triangles,
             textures: renderer.info.memory.textures,
@@ -271,6 +289,7 @@ export function createStage(
       input.dispose();
       removeHook();
       lighting.dispose();
+      pipeline.dispose();
       renderer.dispose();
     },
   };

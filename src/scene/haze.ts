@@ -39,7 +39,7 @@ const FRAGMENT = /* glsl */ `
   void main() {
     float d = length(gl_PointCoord - 0.5);
     float a = smoothstep(0.5, 0.0, d);
-    gl_FragColor = vec4(vec3(1.0, 0.94, 0.84) * vLight * a * 0.9, 1.0);
+    gl_FragColor = vec4(vec3(1.0, 0.94, 0.84) * vLight * a * 0.35, 1.0);
   }
 `;
 
