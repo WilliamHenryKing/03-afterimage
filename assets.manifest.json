@@ -1,0 +1,372 @@
+{
+  "schemaVersion": 1,
+  "project": "03-afterimage",
+  "policy": "Third-party assets are CC0 only (Poly Haven, ambientCG; ODD TIDE copies keep their upstream records). Audio is listed in README credits.",
+  "totalBytes": 5999867,
+  "assets": [
+    {
+      "id": "texture-copper",
+      "title": "ambientCG Metal047B",
+      "role": "Copper boilers and pipes: dirty copper with smudges",
+      "sourceUrl": "https://ambientcg.com/view?id=Metal047B",
+      "downloadUrl": "https://ambientcg.com/get?file=Metal047B_1K-JPG.zip",
+      "author": "ambientCG (Lennart Demes)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "697c61bf5715de0cfa298c537e10ccceb0846feb842046596592ea304171196e",
+      "processingSteps": [
+        "1K JPG set",
+        "packed AO/roughness/metalness into ARM (missing AO white, missing metalness white)",
+        "resized to 1024px",
+        "WebP (colour q84, normal q92, ARM q90)"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/copper/colour.webp",
+          "bytes": 332732,
+          "sha256": "65d1c98c384fcae90387142e036e08236e6c9fef64c9bd8ca457b4ad49861eb5"
+        },
+        {
+          "path": "public/assets/textures/copper/normal.webp",
+          "bytes": 7120,
+          "sha256": "325668397d754a108e72614fbdb9f742e8dddb2e0092ff07241e24e40c930faa"
+        },
+        {
+          "path": "public/assets/textures/copper/arm.webp",
+          "bytes": 248004,
+          "sha256": "d52e0d7d2915e050efe11685d091ec27c11226a0420262e2ca6d18af2c7de833"
+        }
+      ]
+    },
+    {
+      "id": "texture-patina",
+      "title": "ambientCG Metal058B",
+      "role": "Oxidised copper for recesses, flanges and bands",
+      "sourceUrl": "https://ambientcg.com/view?id=Metal058B",
+      "downloadUrl": "https://ambientcg.com/get?file=Metal058B_1K-JPG.zip",
+      "author": "ambientCG (Lennart Demes)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "3ca1b8c05db0765eb77681ab8bb5023f90f75ac72031ae9aad1272c0e795261d",
+      "processingSteps": [
+        "1K JPG set",
+        "packed AO/roughness/metalness into ARM (missing AO white, missing metalness white)",
+        "resized to 512px",
+        "WebP (colour q84, normal q92, ARM q90)"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/patina/colour.webp",
+          "bytes": 22702,
+          "sha256": "1b535b8526c86346f09d8b80de9e7db04d1428fefa4225880c2e49a28fe01acb"
+        },
+        {
+          "path": "public/assets/textures/patina/normal.webp",
+          "bytes": 1588,
+          "sha256": "7c234faa67775e7455d9282c365b18f125d245fe66a69acbe8b5ba50ad1155c4"
+        },
+        {
+          "path": "public/assets/textures/patina/arm.webp",
+          "bytes": 17536,
+          "sha256": "9c0ee5e0b4b8e1a77bb71b29ed8e1b0c606590b8776eaba2e60535aaab7429cc"
+        }
+      ]
+    },
+    {
+      "id": "texture-brass",
+      "title": "ambientCG Metal048B",
+      "role": "Brass fittings: worn gold scan, tinted to brass in the material",
+      "sourceUrl": "https://ambientcg.com/view?id=Metal048B",
+      "downloadUrl": "https://ambientcg.com/get?file=Metal048B_1K-JPG.zip",
+      "author": "ambientCG (Lennart Demes)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "2e9221c60048e97cf16e8070b76ed53a36ed53db3db69c62da31017e274da34b",
+      "processingSteps": [
+        "1K JPG set",
+        "packed AO/roughness/metalness into ARM (missing AO white, missing metalness white)",
+        "resized to 1024px",
+        "WebP (colour q84, normal q92, ARM q90)"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/brass/colour.webp",
+          "bytes": 20844,
+          "sha256": "15b7ed28139ce40410543422f6f83f53ade5e299c18dc5402bcdb71822194aa2"
+        },
+        {
+          "path": "public/assets/textures/brass/normal.webp",
+          "bytes": 3354,
+          "sha256": "f4ed92a403091b52aba7adb009ae4c432016fe99547ac167f386b00e3e2ccea7"
+        },
+        {
+          "path": "public/assets/textures/brass/arm.webp",
+          "bytes": 23730,
+          "sha256": "16ac7b4b7d436052379d018429a182e7b3c9fd2688bd40908754551241748736"
+        }
+      ]
+    },
+    {
+      "id": "texture-dome-plate",
+      "title": "Poly Haven Metal Plate",
+      "role": "Riveted steel plates for the dome shell and shutter",
+      "sourceUrl": "https://polyhaven.com/a/metal_plate",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg",
+      "author": "Rob Tuytel",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5",
+      "processingSteps": [
+        "1K JPG diffuse / nor_gl / arm",
+        "resized to 1024px",
+        "WebP (colour q84, normal q92, ARM q90)"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/dome-plate/colour.webp",
+          "bytes": 101590,
+          "sha256": "a1ad872ec912de64a9a923ebe1bd7116e297a8cf1451020bbeac554bff96777b"
+        },
+        {
+          "path": "public/assets/textures/dome-plate/normal.webp",
+          "bytes": 223238,
+          "sha256": "148dd960bf9fba2629d75dcab88689108527ce8dba1cd4427069c636ba7befe0"
+        },
+        {
+          "path": "public/assets/textures/dome-plate/arm.webp",
+          "bytes": 313858,
+          "sha256": "109f9f31fa5e5b30fa1a2ad4ace2fb76f10efbb175c531c6d9c1e74a3dfc1d5a"
+        }
+      ]
+    },
+    {
+      "id": "texture-shutter",
+      "title": "Poly Haven Painted Metal Shutter",
+      "role": "Painted shutter leaf and rails",
+      "sourceUrl": "https://polyhaven.com/a/painted_metal_shutter",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_metal_shutter/painted_metal_shutter_diff_1k.jpg",
+      "author": "Dario Barresi, Rico Cilliers, Charlotte Baglioni",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "278394aabcb5a5bd560d9904358682acc5af23666b22bd1f12558789da4aa4d2",
+      "processingSteps": [
+        "1K JPG diffuse / nor_gl / arm",
+        "resized to 512px",
+        "WebP (colour q84, normal q92, ARM q90)"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/shutter/colour.webp",
+          "bytes": 18596,
+          "sha256": "2ea17053698d39b969a0eca3242f6a0193fa053ca21d3f32ec4617c0ba06d137"
+        },
+        {
+          "path": "public/assets/textures/shutter/normal.webp",
+          "bytes": 20844,
+          "sha256": "f53a7444d1097b341f45655cc3e89a73aed771000f589c8db832ffda2b87cc2c"
+        },
+        {
+          "path": "public/assets/textures/shutter/arm.webp",
+          "bytes": 16654,
+          "sha256": "f9e4839f60a69f47dd56d4799b39d5f61bc8fb1423c80a9fc54dc593a45788d9"
+        }
+      ]
+    },
+    {
+      "id": "texture-floor",
+      "title": "Rough Concrete (1k diff/nor_gl/arm)",
+      "role": "Observatory floor",
+      "sourceUrl": "https://polyhaven.com/a/rough_concrete",
+      "author": "Poly Haven",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-26",
+      "originalSha256": {
+        "rough_concrete_diff_1k.jpg": "dd7fc03e152eb8c2fd511248aa2e9bf7428a645bd0e0b74ac1d887ad136cb0bc",
+        "rough_concrete_nor_gl_1k.jpg": "54c85854ad5cafb16840df91a605c857bdf3d07fa79f11921c8327fccf6423ae",
+        "rough_concrete_arm_1k.jpg": "1b733bf12c056d680dbc82d53be03dd281ac88ad5555a4a05b5a33ecb579ae1d"
+      },
+      "via": "Copied from the ODD TIDE repository (01-odd-tide, public/textures) with its manifest record, as authorised",
+      "processingSteps": [
+        "Downloaded 1k JPG maps from the Poly Haven download host",
+        "Shipped unmodified (JPG); colour map sRGB, others linear",
+        "ODD TIDE 1K JPG re-encoded to WebP at 1024px"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/floor/colour.webp",
+          "bytes": 345248,
+          "sha256": "2dcffcb11fdcb603b5efc389ace0a59e54759ff3262ea144ea3306f643b36fe5"
+        },
+        {
+          "path": "public/assets/textures/floor/normal.webp",
+          "bytes": 639090,
+          "sha256": "859a86f27f292fcfae11e33738e82e171aa70a7ebb6dcaa2f4cde253104d81aa"
+        },
+        {
+          "path": "public/assets/textures/floor/arm.webp",
+          "bytes": 260776,
+          "sha256": "326e3d3d12887c1c800e7064f5e92233733dea8a1b00c55bc0dca057d8a12b4b"
+        }
+      ]
+    },
+    {
+      "id": "texture-deck",
+      "title": "Distressed Painted Planks (1k diff/nor_gl/arm)",
+      "role": "Sky Deck planks",
+      "sourceUrl": "https://polyhaven.com/a/distressed_painted_planks",
+      "author": "Poly Haven",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-26",
+      "originalSha256": {
+        "distressed_painted_planks_diff_1k.jpg": "ec8d54700e32d583ec3cd64089de73810de1e177874266fe29e931d33ab5ca1e",
+        "distressed_painted_planks_nor_gl_1k.jpg": "65372398238b1a4d723e414b195e94900e076fa63d9409c5acc9b55d795abe88",
+        "distressed_painted_planks_arm_1k.jpg": "10cf35fb0e55ccbf3e4e31f68e8f2d8e4579fe4241bb999669eedbb6b0172722"
+      },
+      "via": "Copied from the ODD TIDE repository (01-odd-tide, public/textures) with its manifest record, as authorised",
+      "processingSteps": [
+        "Downloaded 1k JPG maps from the Poly Haven download host",
+        "Shipped unmodified (JPG); colour map sRGB, others linear",
+        "ODD TIDE 1K JPG re-encoded to WebP at 1024px"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/deck/colour.webp",
+          "bytes": 26012,
+          "sha256": "575aed4df126d641e074cda56c9ba2eff8ad32546afea15e4d4571b9d0f193ec"
+        },
+        {
+          "path": "public/assets/textures/deck/normal.webp",
+          "bytes": 63990,
+          "sha256": "86de7db825df8abc9d5198848c70a9a7202f231a2b9b831eaf374607779c98de"
+        },
+        {
+          "path": "public/assets/textures/deck/arm.webp",
+          "bytes": 37942,
+          "sha256": "6c31dc1d8498b5387714f8e87f745f41d7bd9d7ffd6b7285eca33f03d57eeb72"
+        }
+      ]
+    },
+    {
+      "id": "texture-blanket",
+      "title": "Wool Boucle (1k diff/nor_gl/arm)",
+      "role": "Blankets on the Sky Deck",
+      "sourceUrl": "https://polyhaven.com/a/wool_boucle",
+      "author": "Poly Haven",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-26",
+      "originalSha256": {
+        "wool_boucle_diff_1k.jpg": "fee39653b3c78efe89636508f2c10ceb38ecb10c0d735ae8dd4e9935cf26540e",
+        "wool_boucle_nor_gl_1k.jpg": "2cc13a2be4d0bb942a59a86d613665c0d24ff201560daa4d841cee597af0c752",
+        "wool_boucle_arm_1k.jpg": "5a46c8ded370471c2f26a698e4b33abcaab59f823ead459b97c52297a096053b"
+      },
+      "via": "Copied from the ODD TIDE repository (01-odd-tide, public/textures) with its manifest record, as authorised",
+      "processingSteps": [
+        "Downloaded 1k JPG maps from the Poly Haven download host",
+        "Shipped unmodified (JPG); colour map sRGB, others linear",
+        "ODD TIDE 1K JPG re-encoded to WebP at 512px"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/textures/blanket/colour.webp",
+          "bytes": 102574,
+          "sha256": "0f6ecb9b6af418d1d3264d4524f30059d2150e22c3474ac0a61a063b84fd8f26"
+        },
+        {
+          "path": "public/assets/textures/blanket/normal.webp",
+          "bytes": 117790,
+          "sha256": "929da1c1ce5799b113f5e5706b921e46453267e683f0df71366f6189f49a393b"
+        },
+        {
+          "path": "public/assets/textures/blanket/arm.webp",
+          "bytes": 126806,
+          "sha256": "bb8c06e015748efc5d2d0923d41deb3d6b47b9a4ee96b69db9ddbdc372d5ed78"
+        }
+      ]
+    },
+    {
+      "id": "model-projector",
+      "title": "Poly Haven Filmstrip Projector 8mm",
+      "role": "The projector at the head of the throw",
+      "sourceUrl": "https://polyhaven.com/a/filmstrip_projector_8mm",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/filmstrip_projector_8mm/filmstrip_projector_8mm_1k.gltf",
+      "author": "PeterM",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "dc30aca1cb04428207e92d6b3d2b032cc854fdb1a157aca5ea2570a75b883488",
+      "processingSteps": [
+        "1K glTF with textures",
+        "gltf-transform 4.5.0 optimize: meshopt geometry, WebP textures ≤1024px"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/models/projector.glb",
+          "bytes": 557384,
+          "sha256": "541d7974a7e5369f31053ac5a9f6f695de08ac541cd01203f6f42c5ef338c5ec"
+        }
+      ]
+    },
+    {
+      "id": "model-pipe-lamp",
+      "title": "Poly Haven Industrial Pipe Lamp",
+      "role": "Lamp standards around the observatory floor",
+      "sourceUrl": "https://polyhaven.com/a/industrial_pipe_lamp",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/industrial_pipe_lamp/industrial_pipe_lamp_1k.gltf",
+      "author": "Mateusz Sadek",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "c5a84037c9183d2966c5659213a0d5190f8fce305153829d81028f6589330af7",
+      "processingSteps": [
+        "1K glTF with textures",
+        "gltf-transform 4.5.0 optimize: meshopt geometry, WebP textures ≤1024px"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/models/pipe-lamp.glb",
+          "bytes": 346068,
+          "sha256": "f92bd23ef2240ee39ad405a7a297170efc7a1b1427907261234e70a550e92d87"
+        }
+      ]
+    },
+    {
+      "id": "model-lantern",
+      "title": "Poly Haven Brass Diya Lantern",
+      "role": "Hanging brass lanterns on the Sky Deck",
+      "sourceUrl": "https://polyhaven.com/a/brass_diya_lantern",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/brass_diya_lantern/brass_diya_lantern_1k.gltf",
+      "author": "Bhargav Kubal",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "6b908c48f0f5300ba561cbcfe38e938863e8d1d33569e9a1fab6c7e9c16f8e95",
+      "processingSteps": [
+        "1K glTF with textures",
+        "gltf-transform 4.5.0 optimize: meshopt geometry, WebP textures ≤1024px"
+      ],
+      "outputFiles": [
+        {
+          "path": "public/assets/models/lantern.glb",
+          "bytes": 294564,
+          "sha256": "6b7e380ea7b9b47be54dc752c9778497510b8af207b5a86a7c0421b46625b568"
+        }
+      ]
+    },
+    {
+      "id": "hdri-environment",
+      "title": "Poly Haven Boiler Room",
+      "role": "Environment reflections for metals and glass, dimmed to a night fill",
+      "sourceUrl": "https://polyhaven.com/a/boiler_room",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/boiler_room_1k.hdr",
+      "author": "Oliksiy Yakovlyev",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "originalSha256": "9faea542579ab959d378ff534a6178d1d9e95a4daba082ade93d28936e4f08da",
+      "processingSteps": ["1k Radiance HDR, unmodified; prefiltered at runtime with PMREM"],
+      "outputFiles": [
+        {
+          "path": "public/assets/hdri/boiler_room_1k.hdr",
+          "bytes": 1709233,
+          "sha256": "9faea542579ab959d378ff534a6178d1d9e95a4daba082ade93d28936e4f08da"
+        }
+      ]
+    }
+  ]
+}
