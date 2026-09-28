@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-28T11:02:25.820Z",
+  "shots": [
+    {
+      "name": "wide",
+      "width": 1440,
+      "height": 900,
+      "file": "docs/visual/captures/baseline/wide.png",
+      "ms": 16275,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "pixelRatio": 1,
+      "calls": 177,
+      "triangles": 60338,
+      "textures": 7
+    }
+  ]
+}

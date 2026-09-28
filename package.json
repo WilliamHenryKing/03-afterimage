@@ -22,7 +22,8 @@
     "cloudflare:login": "wrangler login",
     "cloudflare:whoami": "wrangler whoami",
     "deploy": "bun run check && wrangler deploy",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "capture": "bun e2e/capture.ts"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",

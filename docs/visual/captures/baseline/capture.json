@@ -1,0 +1,77 @@
+{
+  "date": "2026-09-28T10:45:07.877Z",
+  "shots": [
+    {
+      "name": "wide",
+      "width": 1440,
+      "height": 900,
+      "file": "docs/visual/captures/baseline/wide.png",
+      "ms": 18355,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "pixelRatio": 1,
+      "calls": 180,
+      "triangles": 60380,
+      "textures": 7
+    },
+    {
+      "name": "hero",
+      "width": 1440,
+      "height": 900,
+      "file": "docs/visual/captures/baseline/hero.png",
+      "ms": 17824,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "pixelRatio": 1,
+      "calls": 158,
+      "triangles": 58106,
+      "textures": 7
+    },
+    {
+      "name": "closeup",
+      "width": 1440,
+      "height": 900,
+      "file": "docs/visual/captures/baseline/closeup.png",
+      "ms": 18613,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "pixelRatio": 1,
+      "calls": 109,
+      "triangles": 57240,
+      "textures": 7
+    },
+    {
+      "name": "grazing",
+      "width": 1440,
+      "height": 900,
+      "file": "docs/visual/captures/baseline/grazing.png",
+      "ms": 18301,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "pixelRatio": 1,
+      "calls": 93,
+      "triangles": 47540,
+      "textures": 7
+    },
+    {
+      "name": "sky",
+      "width": 1440,
+      "height": 900,
+      "file": "docs/visual/captures/baseline/sky.png",
+      "ms": 14806,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "pixelRatio": 1,
+      "calls": 123,
+      "triangles": 48606,
+      "textures": 7
+    },
+    {
+      "name": "phone-hero",
+      "width": 390,
+      "height": 844,
+      "file": "docs/visual/captures/baseline/phone-hero.png",
+      "ms": 8419,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "pixelRatio": 1,
+      "calls": 124,
+      "triangles": 55040,
+      "textures": 7
+    }
+  ]
+}
