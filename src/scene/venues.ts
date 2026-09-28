@@ -16,7 +16,7 @@ const DECK_HIGH = 2.3;
 
 export const CAMERA_SHOTS: Record<VenueFilter, { pos: THREE.Vector3; look: THREE.Vector3 }> = {
   all: { pos: new THREE.Vector3(0, 4.1, 12.8), look: new THREE.Vector3(0, 3.4, -1) },
-  lens: { pos: new THREE.Vector3(6.2, 3.4, 8.2), look: new THREE.Vector3(-0.6, 3.1, -1.2) },
+  lens: { pos: new THREE.Vector3(7.6, 3.8, 5.6), look: new THREE.Vector3(-0.8, 2.9, -0.2) },
   boiler: { pos: new THREE.Vector3(-1.2, 3.1, 8.4), look: new THREE.Vector3(-6.6, 2.4, -1.6) },
   sky: { pos: new THREE.Vector3(3.4, 2.8, 8.8), look: new THREE.Vector3(7.2, 7.2, -6) },
 };
