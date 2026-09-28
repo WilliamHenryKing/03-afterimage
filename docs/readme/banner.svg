@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-label="AFTERIMAGE: the wordmark splits into red, green and blue light and resolves into focus beneath an observatory dome">
+  <title>AFTERIMAGE</title>
+  <defs>
+    <radialGradient id="ink" cx="50%" cy="62%" r="75%">
+      <stop offset="0" stop-color="#1a1f33"/>
+      <stop offset="0.55" stop-color="#0c0e17"/>
+      <stop offset="1" stop-color="#06070b"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#fff1d6" stop-opacity="0.34"/>
+      <stop offset="0.7" stop-color="#fff1d6" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#fff1d6" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" x2="1">
+      <stop offset="0" stop-color="#8a7248"/>
+      <stop offset="0.5" stop-color="#f1dfae"/>
+      <stop offset="1" stop-color="#8a7248"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="glow" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <style>
+    .word { font: 900 148px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; letter-spacing: -4px; }
+    .tag { font: 700 15px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; letter-spacing: 6px; }
+    .ch { mix-blend-mode: screen; }
+    .r { animation: r 6s cubic-bezier(.6,0,.2,1) infinite; }
+    .g { animation: g 6s cubic-bezier(.6,0,.2,1) infinite; }
+    .b { animation: b 6s cubic-bezier(.6,0,.2,1) infinite; }
+    .ink { animation: ink 6s ease-in-out infinite; }
+    .flash { animation: flash 6s ease-out infinite; transform-origin: 640px 190px; }
+    .haze { animation: haze 6s ease-in-out infinite; }
+    @keyframes r { 0%, 8% { transform: translate(-26px, 4px); } 42%, 78% { transform: translate(0, 0); } 100% { transform: translate(-26px, 4px); } }
+    @keyframes g { 0%, 8% { transform: translate(4px, -9px); } 42%, 78% { transform: translate(0, 0); } 100% { transform: translate(4px, -9px); } }
+    @keyframes b { 0%, 8% { transform: translate(26px, 6px); } 42%, 78% { transform: translate(0, 0); } 100% { transform: translate(26px, 6px); } }
+    @keyframes ink { 0%, 38% { opacity: 0; } 46%, 80% { opacity: 1; } 94%, 100% { opacity: 0; } }
+    @keyframes flash { 0%, 40% { opacity: 0; transform: scale(.6); } 45% { opacity: .9; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.35); } }
+    @keyframes haze { 0%, 100% { opacity: .55; } 45% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .r, .g, .b, .ink, .flash, .haze { animation: none; }
+      .flash { opacity: 0; }
+    }
+  </style>
+
+  <rect width="1280" height="360" fill="url(#ink)"/>
+
+  <!-- Observatory dome: meridian ribs and the gallery ring, very faint. -->
+  <g fill="none" stroke="#f1ece0" stroke-opacity="0.07" stroke-width="1.5">
+    <path d="M140 360 A500 470 0 0 1 1140 360"/>
+    <path d="M300 360 C 330 120, 520 -20, 640 -20 C 760 -20, 950 120, 980 360"/>
+    <path d="M470 360 C 490 110, 590 -20, 640 -20 C 690 -20, 790 110, 810 360"/>
+    <path d="M640 -20 V 360"/>
+    <path d="M40 300 Q 640 250 1240 300" stroke="#d8b46a" stroke-opacity="0.18"/>
+  </g>
+  <g fill="#ffcf8a" fill-opacity="0.5">
+    <circle cx="160" cy="291" r="2"/><circle cx="330" cy="281" r="2"/><circle cx="500" cy="276" r="2"/>
+    <circle cx="780" cy="276" r="2"/><circle cx="950" cy="281" r="2"/><circle cx="1120" cy="291" r="2"/>
+  </g>
+
+  <!-- Beam haze rising from the lens below the frame. -->
+  <polygon class="haze" points="610,380 670,380 1010,40 270,40" fill="url(#beam)" filter="url(#soft)"/>
+
+  <!-- Registration rings from the poster identity. -->
+  <g fill="none" stroke="#8fd8ff" stroke-opacity="0.12">
+    <circle cx="640" cy="190" r="70"/><circle cx="640" cy="190" r="120"/><circle cx="640" cy="190" r="170"/>
+    <path d="M640 10 V 370 M330 190 H 950"/>
+  </g>
+
+  <!-- Focus flash. -->
+  <circle class="flash" cx="640" cy="190" r="150" fill="none" stroke="url(#brass)" stroke-width="3" opacity="0"/>
+
+  <!-- The wordmark: three primaries that converge into one. -->
+  <g text-anchor="middle">
+    <text class="word ch r" x="640" y="240" fill="#ff3355">AFTERIMAGE</text>
+    <text class="word ch g" x="640" y="240" fill="#33ffaa">AFTERIMAGE</text>
+    <text class="word ch b" x="640" y="240" fill="#3377ff">AFTERIMAGE</text>
+    <text class="word ink" x="640" y="240" fill="#fff6e4" filter="url(#glow)" opacity="0.5">AFTERIMAGE</text>
+    <text class="word ink" x="640" y="240" fill="#f1ece0">AFTERIMAGE</text>
+    <text class="tag" x="640" y="300" fill="#d8b46a">AN OBSERVATORY FESTIVAL · COMPOSE A NIGHT · LEAVE WITH ITS LIGHT</text>
+  </g>
+</svg>
