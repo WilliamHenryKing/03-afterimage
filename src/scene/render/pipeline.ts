@@ -142,6 +142,42 @@ export class Pipeline {
     this.setSize(this.width, this.height);
   }
 
+  /**
+   * Compile the scene's and every post pass's programs in parallel (KHR_parallel_shader_compile)
+   * before the first frame. three.js keys a program's tone mapping and output colour space on the
+   * render target bound when it compiles (WebGLPrograms: renderer.getRenderTarget()), and the
+   * scene only ever renders into the composer's half-float target, so compile against that
+   * target. Compiling against the screen built the wrong variants, and the first frame then
+   * compiled ~44 programs synchronously on D3D11, holding the arrival veil for seconds.
+   */
+  async warm(scene: THREE.Scene, camera: THREE.Camera): Promise<void> {
+    const passes = new THREE.Scene();
+    const quad = new THREE.PlaneGeometry(2, 2);
+    const seen = new Set<THREE.Material>();
+    const add = (value: unknown) => {
+      if (value instanceof THREE.Material && !seen.has(value)) {
+        seen.add(value);
+        passes.add(new THREE.Mesh(quad, value));
+      }
+    };
+    for (const pass of this.composer.passes) {
+      for (const value of Object.values(pass)) {
+        if (Array.isArray(value)) value.forEach(add);
+        else add(value);
+      }
+    }
+    // compileAsync resolves program parameters synchronously, so the bound target applies.
+    const previous = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.composer.readBuffer);
+    const jobs = [
+      this.renderer.compileAsync(scene, camera),
+      this.renderer.compileAsync(passes, camera),
+    ];
+    this.renderer.setRenderTarget(previous);
+    await Promise.all(jobs);
+    quad.dispose();
+  }
+
   /** Render one frame; `frameMs` is the wall time since the previous frame. */
   render(frameMs: number) {
     this.composer.render();

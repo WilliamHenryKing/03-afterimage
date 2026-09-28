@@ -190,10 +190,15 @@ export class BoilerRoom {
       leaf.castShadow = true;
       boiler.add(door);
       this.fires.push(hole);
-      const fireLight = new THREE.PointLight("#ff7a2e", 6, 0, 2);
-      fireLight.position.set(0, 0.55, r + 0.35);
-      boiler.add(fireLight);
-      this.fireLights.push(fireLight);
+      // One real firebox light for the group: every point light is unrolled into every lit
+      // shader, and a dozen of them made the D3D11 shader compile hold the veil for ~18 s.
+      // The other fireboxes glow through their emissive and bloom.
+      if (bi === 0) {
+        const fireLight = new THREE.PointLight("#ff7a2e", 6, 0, 2);
+        fireLight.position.set(0, 0.55, r + 0.35);
+        boiler.add(fireLight);
+        this.fireLights.push(fireLight);
+      }
 
       // Pressure gauge: brass bezel, dial, needle, glass.
       const gauge = new THREE.Group();
@@ -276,7 +281,7 @@ export class BoilerRoom {
   update(time: number, level: number, reduced: boolean) {
     const flicker = reduced ? 1 : 0.86 + Math.sin(time * 9) * 0.07 + Math.sin(time * 23) * 0.05;
     this.fireLights.forEach((l, i) => {
-      l.intensity = (2.5 + 9 * level) * (reduced ? 1 : flicker + Math.sin(time * 5 + i) * 0.03);
+      l.intensity = (4 + 14 * level) * (reduced ? 1 : flicker + Math.sin(time * 5 + i) * 0.03);
     });
     for (const f of this.fires) f.scale.setScalar(0.85 + 0.15 * level);
     this.needles.forEach((n, i) => {

@@ -70,11 +70,14 @@ export function buildLighting(
     stand.traverse((o) => {
       o.castShadow = o instanceof THREE.Mesh && o.material !== m.bulb;
     });
-    const light = new THREE.PointLight("#ffc88a", 22, 0, 2);
+    const light = new THREE.PointLight("#ffc88a", 32, 0, 2);
     light.position.set(stand.position.x, 2.15 * s - 0.05, stand.position.z);
     lights.push(light);
     stands.push(stand);
-    lamps.add(stand, light);
+    lamps.add(stand);
+    // Every other standard carries a real light (brighter to compensate); the rest glow through
+    // their bulbs and bloom. Every point light is unrolled into every lit shader (see boilers.ts).
+    if (i % 2 === 0) lamps.add(light);
   });
 
   // Gallery bulbs: emitters only (bloom carries their glow), each hung a little differently.
@@ -97,7 +100,7 @@ export function buildLighting(
       // Old filament lamps: a slow, slightly uneven breath.
       lights.forEach((l, i) => {
         l.intensity =
-          22 * (1 + Math.sin(time * 1.7 + i * 2.1) * 0.04 + Math.sin(time * 7.3 + i) * 0.02);
+          32 * (1 + Math.sin(time * 1.7 + i * 2.1) * 0.04 + Math.sin(time * 7.3 + i) * 0.02);
       });
     },
     async loadDeferred() {

@@ -133,15 +133,11 @@ export class SkyDeck {
       this.lanternSlots.push(slot);
       this.group.add(slot);
     });
-    for (const [x, z] of [
-      [-1.2, 0],
-      [1.4, 0],
-    ] as const) {
-      const light = new THREE.PointLight("#ffb45e", 0, 0, 2);
-      light.position.set(x, 0.45, z);
-      this.lights.push(light);
-      this.group.add(light);
-    }
+    // One real light for the lantern group (see boilers.ts: fewer point lights, faster compile).
+    const light = new THREE.PointLight("#ffb45e", 0, 0, 2);
+    light.position.set(0.1, 0.45, 0);
+    this.lights.push(light);
+    this.group.add(light);
   }
 
   private telescope(m: Materials): THREE.Group {
@@ -189,7 +185,7 @@ export class SkyDeck {
 
   update(time: number, level: number, reduced: boolean) {
     this.lights.forEach((l, i) => {
-      l.intensity = (0.4 + 2.6 * level) * (reduced ? 1 : 1 + Math.sin(time * 3 + i * 1.7) * 0.06);
+      l.intensity = (0.8 + 5.2 * level) * (reduced ? 1 : 1 + Math.sin(time * 3 + i * 1.7) * 0.06);
     });
     this.flames.forEach((f, i) => {
       f.scale.y = 1.8 * (reduced ? 1 : 1 + Math.sin(time * 11 + i * 2.3) * 0.12);

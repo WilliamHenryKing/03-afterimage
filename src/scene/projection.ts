@@ -241,9 +241,11 @@ export class Projection {
     this.standBase.receiveShadow = true;
     this.group.add(this.lens, this.stand, this.standBase);
 
-    this.throwBeam = makeBeam("#fff1d6", 0.12, 0.9);
-    this.splits = CHANNELS.map((c) => makeBeam(c.colour, 0.85, 2.1));
-    this.splashes = CHANNELS.map((c) => glowSprite(c.colour, 3.4));
+    // Shafts, not floods: on a real GPU the earlier 0.85 → 2.1 cones and 3.4-unit splashes
+    // (7.4 during the focus flash) swamped the poster in soft colour.
+    this.throwBeam = makeBeam("#fff1d6", 0.1, 0.55);
+    this.splits = CHANNELS.map((c) => makeBeam(c.colour, 0.35, 1.1));
+    this.splashes = CHANNELS.map((c) => glowSprite(c.colour, 1.6));
     this.group.add(this.throwBeam.mesh, ...this.splits.map((b) => b.mesh), ...this.splashes);
   }
 
@@ -257,7 +259,7 @@ export class Projection {
     this.stand.scale.y = Math.max(0.01, this.lens.position.y - 1.24);
 
     aim(this.throwBeam, PROJECTOR, this.lens.position);
-    this.throwBeam.intensity.value = 0.32 + this.flash * 0.6;
+    this.throwBeam.intensity.value = 0.26 + this.flash * 0.45;
     this.throwBeam.time.value = time;
 
     const spill = 1 - focus;
@@ -270,11 +272,11 @@ export class Projection {
         .addScaledVector(offset, 1 + c.k * 1.8)
         .setZ(SCREEN_CENTER.z + 0.05);
       aim(beam, this.lens.position, this.landing);
-      beam.intensity.value = 0.22 + spill * 0.3 + this.flash * 0.7;
+      beam.intensity.value = 0.14 + spill * 0.24 + this.flash * 0.5;
       beam.time.value = time;
       splash.position.copy(this.landing);
-      splash.material.opacity = Math.min(1, 0.15 + spill * 0.45 + this.flash * 0.6);
-      splash.scale.setScalar(3.4 + this.flash * 4);
+      splash.material.opacity = Math.min(0.75, 0.12 + spill * 0.35 + this.flash * 0.4);
+      splash.scale.setScalar(1.6 + this.flash * 1.6);
     });
 
     this.split.value.set(pos.x * 0.12 * spill, pos.y * 0.12 * spill);

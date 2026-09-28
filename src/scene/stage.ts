@@ -184,10 +184,8 @@ export function createStage(
     if (firstFrame) {
       firstFrame = false;
       events.onFirstFrame();
-      // Models and the HDRI stream in after the veil lifts; captures wait for them.
-      Promise.all([lighting.loadDeferred(), projection.loadDeferred(), staging.loadDeferred()])
-        .catch(() => undefined)
-        .then(() => resolveReady());
+      // Models and the HDRI load before the first frame (see below); captures wait for them.
+      deferred.then(() => resolveReady());
     }
     for (let i = waiters.length - 1; i >= 0; i--) {
       const w = waiters[i];
@@ -205,8 +203,19 @@ export function createStage(
   const start = () => {
     if (!disposed) renderer.setAnimationLoop(frame);
   };
+  // Models and the HDRI now load before the veil lifts (capped at 6 s on slow links), so one
+  // parallel warm-up compiles everything; streaming them in afterwards added programs that
+  // compiled synchronously and froze the page (and the veil's fade) for seconds.
+  const deferred = Promise.all([
+    lighting.loadDeferred(),
+    projection.loadDeferred(),
+    staging.loadDeferred(),
+  ])
+    .then(() => undefined)
+    .catch(() => undefined);
   within(attachTextures(materials, pipeline.tier === "low"), 2500)
-    .then(() => renderer.compileAsync(scene, camera))
+    .then(() => within(deferred, 6000))
+    .then(() => pipeline.warm(scene, camera))
     .then(start, start);
 
   function setVenue(v: VenueFilter, instant = reduced) {
