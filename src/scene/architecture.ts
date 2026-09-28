@@ -5,7 +5,7 @@ import type { Materials } from "./materials";
 export const DOME_RADIUS = 14;
 /** Horizontal angle of the dome slit, facing back and to the right (towards the Sky Deck). */
 const SLIT_PHI = 4.25;
-const SLIT_WIDTH = 0.34;
+const SLIT_WIDTH = 0.5;
 
 export interface Architecture {
   group: THREE.Group;
@@ -40,7 +40,7 @@ export function buildArchitecture(m: Materials): Architecture {
       0,
       Math.PI / 2,
     ),
-    new THREE.MeshStandardMaterial({ color: "#121318", roughness: 0.9, side: THREE.BackSide }),
+    new THREE.MeshStandardMaterial({ color: "#1d2130", roughness: 0.85, side: THREE.BackSide }),
   );
   group.add(shell);
 
@@ -105,7 +105,7 @@ export function buildArchitecture(m: Materials): Architecture {
   group.add(gallery);
 
   // Stars beyond the dome, gathered where the slit looks out.
-  const starCount = 900;
+  const starCount = 1600;
   const positions = new Float32Array(starCount * 3);
   for (let i = 0; i < starCount; i++) {
     const phi = SLIT_PHI + (Math.random() - 0.5) * 0.9;
@@ -121,7 +121,7 @@ export function buildArchitecture(m: Materials): Architecture {
     starGeo,
     new THREE.PointsMaterial({
       color: "#dcd6ff",
-      size: 0.16,
+      size: 0.32,
       transparent: true,
       opacity: 0,
       depthWrite: false,

@@ -6,7 +6,7 @@ export interface LensPos {
 }
 
 /** Where the lens starts each visit: well out of focus, low and to one side. */
-export const LENS_START: LensPos = { x: -0.72, y: -0.55 };
+export const LENS_START: LensPos = { x: -0.55, y: -0.35 };
 export const FOCAL: LensPos = { x: 0, y: 0 };
 export const FOCUS_THRESHOLD = 0.08;
 

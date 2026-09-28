@@ -1,7 +1,6 @@
 // Renderer, camera, lights and the loop. Owns the lens position and its pointer/keyboard input.
 import gsap from "gsap";
 import * as THREE from "three";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import {
   clampLens,
   FOCAL,
@@ -14,8 +13,10 @@ import {
 } from "../game/lens";
 import type { VenueFilter } from "../game/schedule";
 import { buildArchitecture } from "./architecture";
+import { buildLighting } from "./lighting";
 import { makeMaterials } from "./materials";
 import { Projection } from "./projection";
+import { Staging } from "./staging";
 import { CAMERA_SHOTS, Venues } from "./venues";
 
 export interface StageEvents {
@@ -48,42 +49,24 @@ export function createStage(
   });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.AgXToneMapping;
-  renderer.toneMappingExposure = 1.15;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#05060a");
-  scene.fog = new THREE.FogExp2("#05060a", 0.028);
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const envTarget = pmrem.fromScene(new RoomEnvironment(), 0.04);
-  scene.environment = envTarget.texture;
-  scene.environmentIntensity = 0.16;
-
-  const key = new THREE.DirectionalLight("#dfe6ff", 1.4);
-  key.position.set(6, 13, 7);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.radius = 4;
-  key.shadow.bias = -0.0005;
-  const sc = key.shadow.camera;
-  sc.left = -12;
-  sc.right = 12;
-  sc.top = 12;
-  sc.bottom = -12;
-  sc.far = 40;
-  scene.add(key);
+  const materials = makeMaterials();
+  const lighting = buildLighting(scene, renderer, materials);
 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 120);
   const shot = CAMERA_SHOTS.all;
   camera.position.copy(shot.pos);
   const look = shot.look.clone();
 
-  const materials = makeMaterials();
   const arch = buildArchitecture(materials);
   const projection = new Projection(materials, poster);
+  projection.pixelRatio = renderer.getPixelRatio();
   const venues = new Venues(materials, projection.lens, arch);
-  scene.add(arch.group, projection.group, venues.group);
+  const staging = new Staging(materials, venues.deck);
+  scene.add(arch.group, projection.group, venues.group, staging.group);
 
   let reduced = false;
   let lens: LensPos = { ...LENS_START };
@@ -120,7 +103,24 @@ export function createStage(
     if (now !== focused) {
       focused = now;
       events.onFocusChange(now);
+      if (now) payoff();
     }
+  }
+
+  // The focus payoff: beams converge in a brief bloom that settles back, with a small lens kick.
+  function payoff() {
+    gsap.killTweensOf(projection);
+    if (reduced) {
+      projection.flash = 0.35;
+      gsap.to(projection, { flash: 0, duration: 0.6, ease: "none" });
+      return;
+    }
+    gsap.fromTo(projection, { flash: 1 }, { flash: 0, duration: 1.4, ease: "expo.out" });
+    gsap.fromTo(
+      renderer,
+      { toneMappingExposure: 2.3 },
+      { toneMappingExposure: 1.6, duration: 1.2, ease: "power2.out" },
+    );
   }
 
   function animateLens(to: LensPos, duration: number) {
@@ -203,6 +203,8 @@ export function createStage(
     const sway = reduced || drag ? 0 : Math.sin(t * 0.7) * 0.006;
     projection.update({ x: lens.x + sway, y: lens.y }, focus, t);
     venues.update(t, reduced);
+    lighting.update(t, reduced);
+    staging.update(t, dt, reduced);
     camera.position.copy(base).sub(look).multiplyScalar(distance).add(look);
     camera.lookAt(look);
     renderer.render(scene, camera);
@@ -215,6 +217,7 @@ export function createStage(
   return {
     setVenue(v) {
       venues.setVenue(v, reduced);
+      staging.setVenue(v, reduced);
       cameraTween?.kill();
       const next = CAMERA_SHOTS[v];
       const d = reduced ? 0 : 1.6;
@@ -250,8 +253,7 @@ export function createStage(
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onUp);
       canvas.removeEventListener("keydown", onKey);
-      envTarget.dispose();
-      pmrem.dispose();
+      lighting.dispose();
       renderer.dispose();
     },
   };

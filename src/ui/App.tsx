@@ -154,7 +154,9 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (focused) sound.play("focus");
+    if (!focused) return;
+    sound.play("focus");
+    sound.chord();
   }, [focused]);
 
   useEffect(() => {

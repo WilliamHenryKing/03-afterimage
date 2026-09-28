@@ -15,10 +15,10 @@ const DECK_LOW = 0.8;
 const DECK_HIGH = 2.3;
 
 export const CAMERA_SHOTS: Record<VenueFilter, { pos: THREE.Vector3; look: THREE.Vector3 }> = {
-  all: { pos: new THREE.Vector3(0, 4.3, 12.4), look: new THREE.Vector3(0, 3.7, -1) },
-  lens: { pos: new THREE.Vector3(1.4, 3.2, 8.6), look: new THREE.Vector3(0, 3.3, -1) },
-  boiler: { pos: new THREE.Vector3(-1.6, 3.4, 9), look: new THREE.Vector3(-6.2, 2.4, -1.2) },
-  sky: { pos: new THREE.Vector3(2.4, 5.4, 9.2), look: new THREE.Vector3(6.4, 4.2, -1.4) },
+  all: { pos: new THREE.Vector3(0, 4.1, 12.8), look: new THREE.Vector3(0, 3.4, -1) },
+  lens: { pos: new THREE.Vector3(6.2, 3.4, 8.2), look: new THREE.Vector3(-0.6, 3.1, -1.2) },
+  boiler: { pos: new THREE.Vector3(-1.2, 3.1, 8.4), look: new THREE.Vector3(-6.6, 2.4, -1.6) },
+  sky: { pos: new THREE.Vector3(3.4, 2.8, 8.8), look: new THREE.Vector3(7.2, 7.2, -6) },
 };
 
 function twistedRibbon(length: number, turns: number): THREE.BufferGeometry {
@@ -40,7 +40,7 @@ export class Venues {
   private readonly lights: Record<VenueId, THREE.PointLight>;
   private readonly rings: THREE.Mesh[] = [];
   private readonly ribbons: THREE.Mesh[] = [];
-  private readonly deck = new THREE.Group();
+  readonly deck = new THREE.Group();
   private readonly beacons = new Map<string, THREE.Mesh>();
   private timeline: gsap.core.Timeline | null = null;
 
@@ -122,21 +122,15 @@ export class Venues {
       pipe.castShadow = true;
       boiler.add(pipe);
     }
-    for (let i = 0; i < 3; i++) {
-      const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 2.6), m.mirror);
-      panel.position.set(-4.4 - i * 1.05, 1.5, -0.4 + i * 0.35);
-      panel.rotation.y = 0.5 + i * 0.12;
-      boiler.add(panel);
-    }
     const foil = new THREE.MeshStandardMaterial({
       color: "#d8b46a",
       metalness: 1,
       roughness: 0.22,
       side: THREE.DoubleSide,
     });
-    for (let i = 0; i < 7; i++) {
-      const ribbon = new THREE.Mesh(twistedRibbon(4.2 + (i % 3) * 0.6, 1.5 + (i % 2)), foil);
-      ribbon.position.set(-3.8 - i * 0.75, 7, -1.8 + Math.sin(i * 1.7) * 1.4);
+    for (let i = 0; i < 5; i++) {
+      const ribbon = new THREE.Mesh(twistedRibbon(3.0 + (i % 3) * 0.5, 1.5 + (i % 2)), foil);
+      ribbon.position.set(-4.4 - i * 1.1, 7, -3.4 + Math.sin(i * 1.7) * 0.6);
       ribbon.scale.y = 0.001;
       ribbon.visible = false;
       boiler.add(ribbon);
@@ -258,7 +252,7 @@ export class Venues {
 
     const open = v === "sky";
     tl.to(this.deck.position, { y: open ? DECK_HIGH : DECK_LOW }, 0);
-    tl.to(this.arch.shutter.rotation, { y: open ? 0.55 : 0 }, 0);
+    tl.to(this.arch.shutter.rotation, { y: open ? 0.7 : 0 }, 0);
     tl.to(this.arch.stars.material, { opacity: open ? 0.95 : 0.12 }, reduced ? 0 : 0.4);
     this.timeline = tl;
   }

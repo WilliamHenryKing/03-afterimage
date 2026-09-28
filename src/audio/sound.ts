@@ -3,6 +3,8 @@
 import { CUE_GAIN, CUES, type Cue, lensHum, musicLevel } from "./mix";
 
 const MUTE_KEY = "afterimage.muted";
+/** D major add9, spread over two octaves: the light resolving. */
+const CHORD = [146.83, 293.66, 369.99, 440, 659.25];
 const url = (name: string) => `${import.meta.env.BASE_URL}audio/${name}.mp3`;
 
 function readMuted(): boolean {
@@ -101,6 +103,26 @@ class SoundEngine {
     gain.gain.value = CUE_GAIN[cue];
     src.connect(gain).connect(this.master);
     src.start();
+  }
+
+  /** A resolving chord for the focus payoff: soft triangle voices, lightly arpeggiated. */
+  chord() {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || this.muted || ctx.state !== "running") return;
+    const now = ctx.currentTime;
+    CHORD.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = i === 0 ? "sine" : "triangle";
+      osc.frequency.value = freq;
+      const gain = ctx.createGain();
+      const start = now + i * 0.045;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(i === 0 ? 0.16 : 0.07, start + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 2.8);
+      osc.connect(gain).connect(this.master as GainNode);
+      osc.start(start);
+      osc.stop(start + 2.9);
+    });
   }
 
   /** Called every frame by the stage with the lens speed and how split the light is. */

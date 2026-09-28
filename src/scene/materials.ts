@@ -13,9 +13,9 @@ export const PALETTE = {
 
 export function makeMaterials() {
   return {
-    stone: new THREE.MeshStandardMaterial({ color: PALETTE.stone, roughness: 0.86, metalness: 0 }),
+    stone: new THREE.MeshStandardMaterial({ color: "#2c2d34", roughness: 0.8, metalness: 0 }),
     floor: new THREE.MeshStandardMaterial({ color: "#101116", roughness: 0.55, metalness: 0.2 }),
-    iron: new THREE.MeshStandardMaterial({ color: "#23242a", roughness: 0.45, metalness: 0.8 }),
+    iron: new THREE.MeshStandardMaterial({ color: "#3a3c44", roughness: 0.42, metalness: 0.8 }),
     brass: new THREE.MeshStandardMaterial({ color: PALETTE.brass, roughness: 0.32, metalness: 1 }),
     copper: new THREE.MeshStandardMaterial({ color: PALETTE.copper, roughness: 0.3, metalness: 1 }),
     mirror: new THREE.MeshStandardMaterial({ color: "#4a4f58", roughness: 0.12, metalness: 1 }),
@@ -58,7 +58,7 @@ const BEAM_FRAGMENT = /* glsl */ `
   varying vec3 vViewDir;
   void main() {
     // Soft edges: brightest where the cone faces the viewer, easing off along its throw.
-    float facing = pow(abs(dot(vNormalV, vViewDir)), 1.6);
+    float facing = pow(abs(dot(vNormalV, vViewDir)), 1.15);
     float along = smoothstep(0.0, 0.06, vUv.y) * (1.0 - smoothstep(0.94, 1.0, vUv.y)) * mix(1.0, 0.6, vUv.y);
     float dust = 0.85 + 0.15 * sin(vUv.y * 40.0 - uTime * 1.3 + vUv.x * 18.0);
     gl_FragColor = vec4(uColor * uIntensity * facing * along * dust, 1.0);

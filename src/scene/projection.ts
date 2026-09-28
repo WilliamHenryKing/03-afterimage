@@ -2,11 +2,12 @@
 // its primaries and spills across the architecture; in focus it resolves into the identity.
 import * as THREE from "three";
 import type { LensPos } from "../game/lens";
+import { Haze } from "./haze";
 import { beamMaterial, glowSprite, type Materials } from "./materials";
 
-const LENS_HOME = new THREE.Vector3(0, 1.85, 2.4);
+const LENS_HOME = new THREE.Vector3(0, 1.75, 2.4);
 const LENS_TRAVEL = new THREE.Vector2(2.6, 0.8);
-const PROJECTOR = new THREE.Vector3(0, 1.0, 7.4);
+export const PROJECTOR = new THREE.Vector3(0, 1.0, 7.4);
 export const SCREEN_CENTER = new THREE.Vector3(0, 4.5, -4.2);
 const SCREEN_W = 3.6;
 const SCREEN_H = 4.8;
@@ -91,6 +92,11 @@ export class Projection {
   private readonly split: THREE.IUniform<THREE.Vector2>;
   private readonly spot: THREE.IUniform<THREE.Vector2>;
   private readonly focus: THREE.IUniform<number>;
+  private readonly gain: THREE.IUniform<number>;
+  private readonly haze = new Haze();
+  /** 0..1 burst when the image resolves; tweened by the stage. */
+  flash = 0;
+  pixelRatio = 1;
   private readonly throwBeam: Beam;
   private readonly splits: Beam[];
   private readonly splashes: THREE.Sprite[];
@@ -117,6 +123,7 @@ export class Projection {
     this.split = uniform(screenMat, "uSplit");
     this.spot = uniform(screenMat, "uSpot");
     this.focus = uniform(screenMat, "uFocus");
+    this.gain = uniform(screenMat, "uGain");
     const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_W, SCREEN_H), screenMat);
     screen.position.copy(SCREEN_CENTER);
     this.group.add(screen);
@@ -157,9 +164,11 @@ export class Projection {
       o.castShadow = true;
     });
     this.group.add(projector);
-    const aperture = glowSprite("#fff4dc", 1.1);
+    const aperture = glowSprite("#fff4dc", 1.6);
     aperture.position.copy(PROJECTOR);
-    this.group.add(aperture);
+    const lamp = new THREE.PointLight("#ffe2b0", 5, 6, 1.6);
+    lamp.position.copy(PROJECTOR).add(new THREE.Vector3(0, 0.4, 0.6));
+    this.group.add(aperture, lamp, this.haze.points);
 
     // The great lens: glass, rim and yoke, hung from a rod.
     const glass = new THREE.Mesh(new THREE.SphereGeometry(1.0, 48, 24), m.glass);
@@ -192,7 +201,7 @@ export class Projection {
     this.stand.scale.y = Math.max(0.01, this.lens.position.y - 1.24);
 
     aim(this.throwBeam, PROJECTOR, this.lens.position);
-    this.throwBeam.intensity.value = 0.55;
+    this.throwBeam.intensity.value = 0.95 + this.flash;
     this.throwBeam.time.value = time;
 
     const spill = 1 - focus;
@@ -205,15 +214,18 @@ export class Projection {
         .addScaledVector(offset, 1 + c.k * 1.8)
         .setZ(SCREEN_CENTER.z + 0.05);
       aim(beam, this.lens.position, this.landing);
-      beam.intensity.value = 0.22 + spill * 0.28;
+      beam.intensity.value = 0.34 + spill * 0.36 + this.flash * 0.9;
       beam.time.value = time;
       splash.position.copy(this.landing);
-      splash.material.opacity = 0.25 + spill * 0.55;
+      splash.material.opacity = Math.min(1, 0.3 + spill * 0.55 + this.flash);
+      splash.scale.setScalar(3.4 + this.flash * 4);
     });
 
     this.split.value.set(pos.x * 0.12 * spill, pos.y * 0.12 * spill);
     this.spot.value.set(0.5 + pos.x * 0.35, 0.5 + pos.y * 0.35);
     this.focus.value = focus;
+    this.gain.value = 1.9 + this.flash * 2.2;
+    this.haze.update(PROJECTOR, this.lens.position, SCREEN_CENTER, spill, time, this.pixelRatio);
   }
 
   posterChanged() {
