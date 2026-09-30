@@ -7,6 +7,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { GTAOPass } from "three/examples/jsm/postprocessing/GTAOPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { SMAAPass } from "three/examples/jsm/postprocessing/SMAAPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
@@ -21,13 +22,60 @@ const ORDER: Tier[] = ["high", "medium", "low"];
 /** Drawing-buffer pixel budget, so a large retina canvas stays bounded (~2560 × 1440). */
 const PIXEL_BUDGET = 3.7e6;
 
-/** Starting tier: a `?quality=` override, else phones and small screens start at medium. */
+/**
+ * Zeroes NaN and infinity (all exponent bits set: immune to fast-math) and caps HDR values
+ * before bloom. Some GPUs (Apple's) make NaN where others quietly don't, and bloom's blur
+ * would spread one bad pixel over the whole frame.
+ */
+const FiniteShader = {
+  name: "FiniteShader",
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: /* glsl */ `
+    varying vec2 vUv;
+    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    varying vec2 vUv;
+    float finite(float x) {
+      return (floatBitsToUint(x) & 0x7f800000u) == 0x7f800000u ? 0.0 : clamp(x, 0.0, 16384.0);
+    }
+    void main() {
+      vec4 c = texture2D(tDiffuse, vUv);
+      gl_FragColor = vec4(finite(c.r), finite(c.g), finite(c.b), 1.0);
+    }`,
+};
+
+/** The GPU's name, for a first guess at the tier (empty if WebGL 2 is unavailable). */
+function gpuName(): string {
+  try {
+    const gl = document.createElement("canvas").getContext("webgl2");
+    if (!gl) return "";
+    const ext = gl.getExtension("WEBGL_debug_renderer_info");
+    const name = String(
+      ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER),
+    );
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return name;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Starting tier: a `?quality=` override; phones and small screens start at medium; otherwise
+ * the GPU decides (integrated graphics start at medium, software rendering at low). The
+ * adaptive step corrects the guess in play.
+ */
 export function initialTier(): Tier {
   const forced = new URLSearchParams(window.location.search).get("quality");
   if (forced === "high" || forced === "medium" || forced === "low") return forced;
   const coarse = window.matchMedia("(pointer: coarse)").matches;
   const small = Math.min(window.innerWidth, window.innerHeight) < 700;
-  return coarse || small ? "medium" : "high";
+  if (coarse || small) return "medium";
+  const gpu = gpuName();
+  if (/swiftshader|llvmpipe|software|basic render/i.test(gpu)) return "low";
+  if (/nvidia|geforce|rtx|gtx|radeon (rx|pro)|amd radeon rx|apple m[2-9]/i.test(gpu)) return "high";
+  return gpu ? "medium" : "high";
 }
 
 type VisibilityPatched = { _overrideVisibility(): void; _visibilityCache: THREE.Object3D[] };
@@ -97,6 +145,7 @@ export class Pipeline {
         }
     };
     this.composer.addPass(this.ao);
+    this.composer.addPass(new ShaderPass(FiniteShader));
 
     // Bloom is lens glare: only energy above the threshold, clamped so a lamp cannot flood the frame.
     this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.24, 0.3, 1.8);
