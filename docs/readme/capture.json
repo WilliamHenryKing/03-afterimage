@@ -1,0 +1,38 @@
+{
+  "slug": "03-afterimage",
+  "sourceCommit": "fd7772affa4f7e8ed8c7524ce78a79c334947bdf",
+  "url": "https://03-afterimage.williamking.workers.dev",
+  "capturedAt": "2026-10-01T06:12:34.920Z",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 2060 (0x00001F15) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "errors": [],
+  "desktop": {
+    "width": 1440,
+    "height": 900
+  },
+  "phone": {
+    "width": 390,
+    "height": 844
+  },
+  "frames": 48,
+  "browser": "154.0.8037.58",
+  "assets": [
+    "/assets/index-BNhdo1cv.js"
+  ],
+  "matchesLocalBuild": true,
+  "phoneOverflow": false,
+  "gifBytes": 1087621,
+  "description": "The current observatory lens focusing into the AFTERIMAGE identity",
+  "phoneIsEmulated": true,
+  "loop": {
+    "frames": 48,
+    "delayCentiseconds": 16,
+    "width": 720,
+    "disposal": "None"
+  },
+  "media": [
+    "preview.gif",
+    "desktop.jpg",
+    "detail.jpg",
+    "phone.jpg"
+  ]
+}
